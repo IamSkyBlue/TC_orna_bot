@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 
 import pygsheets
 
+load_dotenv()
 gc = pygsheets.authorize(service_account_env_var = 'GDRIVE_API_CREDENTIALS')
 sh = gc.open('Ornabook')
 wks = sh[0]
 
-load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='~')
 
