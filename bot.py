@@ -3,13 +3,16 @@ import os
 
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
 
 import pygsheets
 
-gc = pygsheets.authorize(service_file='sheetAPI.json')
+gc = pygsheets.authorize(service_account_env_var = 'GDRIVE_API_CREDENTIALS')
 sh = gc.open('Ornabook')
 wks = sh[0]
 
+load_dotenv()
+token = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='~')
 
 @bot.event
@@ -25,4 +28,4 @@ async def search(ctx,name,category='orna'):
         for item in wks.get_row(title.row,include_tailing_empty=False)[1::]:
             await ctx.send(item)
 
-bot.run('NTM1MjgyOTAxNDIwNDc0Mzkw.XjjwAw.bHdSvTuscz6GQdVL1Q-kBpPrixg')
+bot.run(token)
