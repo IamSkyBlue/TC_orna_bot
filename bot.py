@@ -21,7 +21,7 @@ async def on_ready():
 
 @bot.command(name='search')
 async def search(ctx,name,category='orna'):
-    titles=wks.find(name,cols=(1,1))
+    titles=wks.find(name,cols=(1,1),matchEntireCell=True)
     if not titles:
         await ctx.send('尚無資料，歡迎至 https://tinyurl.com/wxa9qxy 新增資料')
     for title in titles:
