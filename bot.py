@@ -23,9 +23,16 @@ async def on_ready():
 async def search(ctx,name,category='orna'):
     titles=wks.find(name,cols=(1,1),matchEntireCell=True)
     if not titles:
-        await ctx.send('尚無資料，歡迎至 https://tinyurl.com/wxa9qxy 新增資料')
+        try:
+            await ctx.send('尚無資料，歡迎至 https://tinyurl.com/wxa9qxy 新增資料')
+        except:
+             pass
+        return
     for title in titles:
         for item in wks.get_row(title.row,include_tailing_empty=False)[1::]:
-            await ctx.send(item)
+            try:
+                await ctx.send(item)
+            except:
+                pass
 
 bot.run(token)
