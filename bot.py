@@ -21,6 +21,12 @@ async def on_ready():
 
 @bot.command(name='search')
 async def search(ctx,name,category='orna'):
+    if name == 'index':
+        message = '資料庫已有目錄: ```'
+        indexString = ' , '.join(sorted(wks.get_col(1,include_tailing_empty=False)[1::]))
+        message =message + indexString + '```'
+        await ctx.send(message)
+        return
     titles=wks.find(name,cols=(1,1),matchEntireCell=True)
     if not titles:
         try:
