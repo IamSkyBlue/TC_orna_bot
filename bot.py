@@ -17,6 +17,12 @@ wks = sh[0]
 token = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='~',description='Orna字典機器人, 透過社群的力量建起的機器人\n一起貢獻: https://tinyurl.com/wxa9qxy')
 
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="~help 取得幫助"))
+    bot.add_cog(general(bot))
+    print('connected to Discord!')
+
 class general(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
