@@ -15,12 +15,13 @@ sh = gc.open('Ornabook')
 wks = sh[0]
 
 token = os.getenv('DISCORD_TOKEN')
-bot = commands.Bot(command_prefix='~',description='Orna字典機器人, 透過社群的力量建起的機器人\n一起貢獻: https://tinyurl.com/wxa9qxy')
+bot = commands.Bot(command_prefix='~',description='Orna字典機器人, 透過社群的力量建起的機器人\n一起貢獻: https://tinyurl.com/wxa9qxy\nlittle RR index bot RR地區指數查詢機器人')
 
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="~help 取得幫助"))
     bot.add_cog(general(bot))
+    bot.add_cog(RR(bot))
     print('connected to Discord!')
 
 class general(commands.Cog):
@@ -57,5 +58,65 @@ class general(commands.Cog):
                 await ctx.send(message)
             except:
                 pass
+
+
+class RR(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.lastRefreshTime = 999
+        self.data = []
+        self.dataRefresh.start()
+
+
+    @tasks.loop(minutes=10)
+    async def dataRefresh(self):
+        url = 'http://indextracker.ga/'
+        try:
+            html = requests.get(url).content.decode('utf-8')
+        except requests.exceptions.Timeout:
+            pass
+        sp = BeautifulSoup(html,'html.parser')
+        newRefreshTime = int(sp.select('footer div div')[0].text.split(' ')[18])
+        if self.lastRefreshTime > newRefreshTime:
+            print('data has been changed, catching data...')
+            self.data = [item.text for item in sp.find_all('td')]
+            self.lastRefreshTime = newRefreshTime
+            print('done')
+
+    @dataRefresh.before_loop
+    async def before_dataRefresh(self):
+        print('waiting to start loop...')
+        await self.bot.wait_until_ready()
+
+    @commands.command(name='rr', help='使用方法: ~rr <health|mil|edu|dev>')
+    async def health(self, ctx, col):
+        indexNameList = ['健康','軍事','教育','發展']
+        if col == "health":
+            dataIndex = 0
+        elif col == "mil":
+            dataIndex = 1
+        elif col == "edu":
+            dataIndex = 2
+        elif col == "dev":
+            dataIndex = 3
+        else:
+            await ctx.send('錯誤的項目名稱，請使用health, mil, edu, dev')
+            return
+        title = indexNameList[dataIndex] + "指數的建築物數量︰"
+        msg = "Last update " + str(self.lastRefreshTime) +" hours ago"
+        embed=discord.Embed(title=title)
+        embed.add_field(name="10 - ", value=self.data[dataIndex*10 + 0], inline=True)
+        embed.add_field(name="9 - ", value=self.data[dataIndex*10 + 1], inline=False)
+        embed.add_field(name="8 - ", value=self.data[dataIndex*10 + 2], inline=False)
+        embed.add_field(name="7 - ", value=self.data[dataIndex*10 + 3], inline=False)
+        embed.add_field(name="6 - ", value=self.data[dataIndex*10 + 4], inline=False)
+        embed.add_field(name="5 - ", value=self.data[dataIndex*10 + 5], inline=False)
+        embed.add_field(name="4 - ", value=self.data[dataIndex*10 + 6], inline=False)
+        embed.add_field(name="3 - ", value=self.data[dataIndex*10 + 7], inline=False)
+        embed.add_field(name="2 - ", value=self.data[dataIndex*10 + 8], inline=False)
+        embed.add_field(name="1 - ", value="0", inline=False)
+        embed.set_footer(text=msg)
+        await ctx.send(embed=embed)
+
 
 bot.run(token)

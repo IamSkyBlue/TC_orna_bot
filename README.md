@@ -6,3 +6,8 @@ discord邀請連結: https://discordapp.com/api/oauth2/authorize?client_id=67450
 
 使用教學: ~search <你要搜尋的東西>
 若查詢不到東西歡迎透過機器人訊息中的連結至google sheet自行新增
+
+------
+RR Index 查詢機器人
+
+由 http://indextracker.ga/ 抓取資料至discord
