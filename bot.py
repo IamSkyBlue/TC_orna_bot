@@ -108,7 +108,10 @@ class RR(commands.Cog):
             await ctx.send('錯誤的項目名稱，請使用health, mil, edu, dev')
             return
         title = indexNameList[dataIndex] + "指數的建築物數量︰"
-        msg = "Last update " + str(self.lastRefreshTime) +" hours ago"
+        if self.lastRefreshTime < 60:
+            msg = "Last update " + str(self.lastRefreshTime) +" minutes ago"
+        else:
+            msg = "Last update " + str(int(self.lastRefreshTime/60)) +" hours ago"
         embed=discord.Embed(title=title)
         embed.add_field(name="10 - ", value=self.data[dataIndex*10 + 0], inline=True)
         embed.add_field(name="9 - ", value=self.data[dataIndex*10 + 1], inline=False)
