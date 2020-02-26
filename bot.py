@@ -1,5 +1,6 @@
 # encoding: utf-8
 import os
+import re
 
 import discord
 from discord.ext import commands, tasks
@@ -63,7 +64,7 @@ class Orna(commands.Cog):
 class RR(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.lastRefreshTime = 999
+        self.lastRefreshTime = 99999
         self.data = []
         self.dataRefresh.start()
 
@@ -74,9 +75,13 @@ class RR(commands.Cog):
         try:
             html = requests.get(url).content.decode('utf-8')
         except requests.exceptions.Timeout:
-            pass
+            return
         sp = BeautifulSoup(html,'html.parser')
         newRefreshTime = int(sp.select('footer div div')[0].text.split(' ')[18])
+        if sp.select('footer div div')[0].text.split(' ')[19][0] == 'h':
+            newRefreshTime *= 60
+        if sp.select('footer div div')[0].text.split(' ')[19][0] == 's':
+            newRefreshTime = 0
         if self.lastRefreshTime > newRefreshTime:
             print('data has been changed, catching data...')
             self.data = [item.text for item in sp.find_all('td')]
