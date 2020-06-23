@@ -91,12 +91,17 @@ class Orna(commands.Cog):
             "\N{REGIONAL INDICATOR SYMBOL LETTER Z}"
         ]
         if len(args)>27:
-            message='創建失敗，請勿超過26個選項'
-        ctx.send('\N{Bar Chart}' + args[0])
+            await ctx.send('創建失敗，請勿超過26個選項')
+            return
+        if len(args)==1:
+            await ctx.send('創建失敗，至少要有1個選項')
+            return
+        await ctx.send('\N{Bar Chart}' + args[0])
         embed=discord.Embed(color=0x0000e1)
         for i,item in enumerate(args[1::]):
             embed.add_field(name=emojiLetters[i]+item,value='', inline=False)
-            ctx.add_reaction(emojiLetters[i])
-        await ctx.send(embed=embed)
+        pollMessage = await ctx.send(embed=embed)
+        for i,item in enumerate(args[1::]):
+            await pollMessage.add_reaction(emojiLetters[i])
 
 bot.run(token)
