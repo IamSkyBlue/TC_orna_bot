@@ -99,7 +99,7 @@ class Orna(commands.Cog):
         await ctx.send('\N{Bar Chart}' + args[0])
         embed=discord.Embed(color=0x0000e1)
         for i,item in enumerate(args[1::]):
-            embed.add_field(name=emojiLetters[i]+item,value='', inline=False)
+            embed.add_field(name=emojiLetters[i]+item,value="", inline=False)
         pollMessage = await ctx.send(embed=embed)
         for i,item in enumerate(args[1::]):
             await pollMessage.add_reaction(emojiLetters[i])
