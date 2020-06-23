@@ -60,71 +60,43 @@ class Orna(commands.Cog):
             except:
                 pass
 
-
-class RR(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.lastRefreshTime = 99999
-        self.data = []
-        self.dataRefresh.start()
-
-
-    @tasks.loop(minutes=10)
-    async def dataRefresh(self):
-        url = 'http://indextracker.ga/'
-        try:
-            html = requests.get(url).content.decode('utf-8')
-        except requests.exceptions.Timeout:
-            return
-        sp = BeautifulSoup(html,'html.parser')
-        newRefreshTime = int(sp.select('footer div div')[0].text.split(' ')[18])
-        if sp.select('footer div div')[0].text.split(' ')[19][0] == 'h':
-            newRefreshTime *= 60
-        if sp.select('footer div div')[0].text.split(' ')[19][0] == 's':
-            newRefreshTime = 0
-        if self.lastRefreshTime > newRefreshTime:
-            print('data has been changed, catching data...')
-            self.data = [item.text for item in sp.find_all('td')]
-            self.lastRefreshTime = newRefreshTime
-            print('done')
-
-    @dataRefresh.before_loop
-    async def before_dataRefresh(self):
-        print('waiting to start loop...')
-        await self.bot.wait_until_ready()
-
-    @commands.command(name='rr', help='使用方法: ~rr <health|mil|edu|dev>')
-    async def health(self, ctx, col):
-        indexNameList = ['健康','軍事','教育','發展']
-        if col == "health":
-            dataIndex = 0
-        elif col == "mil":
-            dataIndex = 1
-        elif col == "edu":
-            dataIndex = 2
-        elif col == "dev":
-            dataIndex = 3
-        else:
-            await ctx.send('錯誤的項目名稱，請使用health, mil, edu, dev')
-            return
-        title = indexNameList[dataIndex] + "指數的建築物數量︰"
-        if self.lastRefreshTime < 60:
-            msg = "Last update " + str(self.lastRefreshTime) +" minutes ago"
-        else:
-            msg = "Last update " + str(int(self.lastRefreshTime/60)) +" hours ago"
-        embed=discord.Embed(title=title)
-        embed.add_field(name="10 - ", value=self.data[dataIndex*10 + 0], inline=True)
-        embed.add_field(name="9 - ", value=self.data[dataIndex*10 + 1], inline=False)
-        embed.add_field(name="8 - ", value=self.data[dataIndex*10 + 2], inline=False)
-        embed.add_field(name="7 - ", value=self.data[dataIndex*10 + 3], inline=False)
-        embed.add_field(name="6 - ", value=self.data[dataIndex*10 + 4], inline=False)
-        embed.add_field(name="5 - ", value=self.data[dataIndex*10 + 5], inline=False)
-        embed.add_field(name="4 - ", value=self.data[dataIndex*10 + 6], inline=False)
-        embed.add_field(name="3 - ", value=self.data[dataIndex*10 + 7], inline=False)
-        embed.add_field(name="2 - ", value=self.data[dataIndex*10 + 8], inline=False)
-        embed.add_field(name="1 - ", value="0", inline=False)
-        embed.set_footer(text=msg)
+    @commands.command(name='poll', help='使用方法: ~poll "投票名稱" "項目一" "項目二"..... 中間記得空格')
+    async def poll(self, ctx, *args):
+        emojiLetters = [
+            "\N{REGIONAL INDICATOR SYMBOL LETTER A}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER B}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER C}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER D}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER E}", 
+            "\N{REGIONAL INDICATOR SYMBOL LETTER F}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER G}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER H}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER I}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER J}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER K}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER L}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER M}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER N}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER O}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER P}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER Q}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER R}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER S}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER T}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER U}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER V}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER W}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER X}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER Y}",
+            "\N{REGIONAL INDICATOR SYMBOL LETTER Z}"
+        ]
+        if len(args)>27:
+            message='創建失敗，請勿超過26個選項'
+        ctx.send('\N{Bar Chart}' + args[0])
+        embed=discord.Embed(color=0x0000e1)
+        for i,item in enumerate(args[1::]):
+            embed.add_field(name=emojiLetters[i]+item,value='', inline=False)
+            ctx.add_reaction(emojiLetters[i])
         await ctx.send(embed=embed)
-
 
 bot.run(token)
