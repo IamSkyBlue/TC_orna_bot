@@ -99,7 +99,7 @@ class Orna(commands.Cog):
         optionMessage = ""
         for i,item in enumerate(args[1::]):
             optionMessage = optionMessage + emojiLetters[i]+item + "\n"
-        embed=discord.Embed(title=optionMessage,color=0x0000e1)
+        embed=discord.Embed(description=optionMessage,color=0x0000e1)
         pollMessage = await ctx.send(embed=embed)
         for i,item in enumerate(args[1::]):
             await pollMessage.add_reaction(emojiLetters[i])
