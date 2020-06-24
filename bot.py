@@ -97,8 +97,10 @@ class Orna(commands.Cog):
             return
         await ctx.send('\N{Bar Chart}' + args[0])
         embed=discord.Embed(color=0x0000e1)
+        optionMessage = ""
         for i,item in enumerate(args[1::]):
-            embed.add_field(name="\u200b",value=emojiLetters[i]+item, inline=False)
+            optionMessage = optionMessage + emojiLetters[i]+item + "\n"
+        embed.add_field(name="\u200b",value=optionMessage, inline=False)
         pollMessage = await ctx.send(embed=embed)
         for i,item in enumerate(args[1::]):
             await pollMessage.add_reaction(emojiLetters[i])
