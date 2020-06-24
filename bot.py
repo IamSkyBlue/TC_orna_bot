@@ -96,11 +96,10 @@ class Orna(commands.Cog):
             await ctx.send('創建失敗，至少要有1個選項')
             return
         await ctx.send('\N{Bar Chart}' + args[0])
-        embed=discord.Embed(color=0x0000e1)
         optionMessage = ""
         for i,item in enumerate(args[1::]):
             optionMessage = optionMessage + emojiLetters[i]+item + "\n"
-        embed.add_field(name=optionMessage,value="\u200b", inline=False)
+        embed=discord.Embed(title=optionMessage,color=0x0000e1)
         pollMessage = await ctx.send(embed=embed)
         for i,item in enumerate(args[1::]):
             await pollMessage.add_reaction(emojiLetters[i])
