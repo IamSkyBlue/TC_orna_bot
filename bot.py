@@ -22,7 +22,6 @@ bot = commands.Bot(command_prefix='~',description='Orna字典機器人, 透過�
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="~help 取得幫助"))
     bot.add_cog(Orna(bot))
-    bot.add_cog(RR(bot))
     print('connected to Discord!')
 
 class Orna(commands.Cog):
@@ -99,7 +98,7 @@ class Orna(commands.Cog):
         await ctx.send('\N{Bar Chart}' + args[0])
         embed=discord.Embed(color=0x0000e1)
         for i,item in enumerate(args[1::]):
-            embed.add_field(name=emojiLetters[i],value=item, inline=False)
+            embed.add_field(name="",value=emojiLetters[i]+item, inline=False)
         pollMessage = await ctx.send(embed=embed)
         for i,item in enumerate(args[1::]):
             await pollMessage.add_reaction(emojiLetters[i])
