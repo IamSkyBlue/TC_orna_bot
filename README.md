@@ -1,5 +1,7 @@
 ## 小小的 Discord Bot
 
+運行版本為 python3.8
+
 本 bot 已參雜除了 Orna 之外的私人功能，但不影響原先 Orna 機器人的使用
 
 Cogs 說明
