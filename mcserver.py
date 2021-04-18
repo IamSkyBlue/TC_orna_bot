@@ -30,17 +30,29 @@ class MCserver(commands.Cog):
         if not ctx.guild.id in ALLOW_GUILD:
             await ctx.send("這是私人的伺服器喔~抱歉")
             return
-        try:
-            query = server.query()
-            onlinePeople = "\n".join(query.players.names)
-        except:
-            await ctx.send("目前伺服器沒開或是正在開啟中喔")
-            return
-        await ctx.send("伺服器開著喔")
-        if query.players.names:
-            await ctx.send("目前有這些人在線上:\n" + onlinePeople)
+        response = requests.get(URL, headers=HEADERS)
+        if response.status_code != 200:
+            await ctx.send("發生問題，請聯絡SkyBlue")
+            await ctx.send(str(response.content))
         else:
-            await ctx.send("但沒有人在線上QQ")
+            status = json.loads(response.content)
+            if status["droplet"]["status"] == "off":
+                await ctx.send("伺服器是關閉狀態")
+            elif status["droplet"]["status"] == "active":
+                try:
+                    query = server.query()
+                    onlinePeople = "\n".join(query.players.names)
+                except:
+                    await ctx.send("目前伺服器正在開啟中喔，如果已經等很久還沒開好請聯絡SkyBlue")
+                    return
+                await ctx.send("伺服器開著喔")
+                if query.players.names:
+                    await ctx.send("目前有這些人在線上:\n" + onlinePeople)
+                else:
+                    await ctx.send("但沒有人在線上QQ")
+            else:
+                await ctx.send("發生問題，請聯絡SkyBlue")
+                await ctx.send(str(response.content))
 
     @commands.command(name="mc-on", help="開啟伺服器 使用方法: ~mc-on")
     async def mcon(self, ctx, *args):
@@ -48,7 +60,10 @@ class MCserver(commands.Cog):
             await ctx.send("這是私人的伺服器喔~抱歉")
             return
         response = requests.get(URL, headers=HEADERS)
-        if response.status_code == 200:
+        if response.status_code != 200:
+            await ctx.send("發生問題，請聯絡SkyBlue")
+            await ctx.send(str(response.content))
+        else:
             status = json.loads(response.content)
             if status["droplet"]["status"] == "active":
                 try:
@@ -73,11 +88,14 @@ class MCserver(commands.Cog):
             await ctx.send("這是私人的伺服器喔~抱歉")
             return
         response = requests.get(URL, headers=HEADERS)
-        if response.status_code == 200:
+        if response.status_code != 200:
+            await ctx.send("發生問題，請聯絡SkyBlue")
+            await ctx.send(str(response.content))
+        else:
             status = json.loads(response.content)
             if status["droplet"]["status"] == "off":
                 await ctx.send("伺服器已經是關閉狀態")
-            if status["droplet"]["status"] == "active":
+            elif status["droplet"]["status"] == "active":
                 try:
                     query = server.query()
                     if query.players.names:
@@ -94,3 +112,6 @@ class MCserver(commands.Cog):
                             await ctx.send(str(response.content))
                 except:
                     await ctx.send("伺服器還在開啟當中，先不要急著關\n如果已經等很久還沒開好請聯絡SkyBlue")
+            else:
+                await ctx.send("發生問題，請聯絡SkyBlue")
+                await ctx.send(str(response.content))
