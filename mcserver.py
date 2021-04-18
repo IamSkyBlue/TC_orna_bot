@@ -1,8 +1,9 @@
+import os
+import requests
+import json
 import discord
 from discord.ext import commands, tasks
 from mcstatus import MinecraftServer
-import requests
-import json
 
 
 ALLOW_GUILD = eval(os.getenv("ALLOW_GUILD"))
