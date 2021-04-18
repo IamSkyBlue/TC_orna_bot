@@ -20,13 +20,8 @@ google-auth-httplib2==0.0.3
 google-auth-oauthlib==0.4.1
 httplib2==0.18.0
 idna==2.8
-ipykernel==5.5.0
-ipython==7.21.0
-ipython-genutils==0.2.0
 isort==4.3.21
 jedi==0.18.0
-jupyter-client==6.1.11
-jupyter-core==4.7.1
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
 mcstatus==5.1.4
