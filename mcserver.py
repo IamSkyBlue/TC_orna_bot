@@ -148,6 +148,8 @@ class Snapshot:
         response = requests.post(url, data=json.dumps(payload), headers=HEADERS)
         if response.status_code == 202:
             return True
+        else:
+            return False
 
 
 def get_server():
@@ -182,7 +184,7 @@ class MCserver(commands.Cog):
             except Exception as e:
                 await ctx.send("發生問題，請聯絡SkyBlue" + str(e))
                 return
-            await ctx.send("伺服器開著喔")
+            await ctx.send("伺服器開著喔 IP: " + droplet.get_address() + ":25565")
             if query.players.names:
                 await ctx.send("目前有這些人在線上:\n" + online_people)
             else:
