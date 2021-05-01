@@ -21,19 +21,6 @@ class Orna(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="status", help="使用方法: ~status 可查詢遊戲伺服器狀態")
-    async def status(self, ctx):
-        ornaStatusList = ["遊戲本體", "地圖", "官網"]
-        url = "https://orna.statuspal.io/"
-        html = requests.get(url).content.decode("utf-8")
-        sp = BeautifulSoup(html, "html.parser")
-        for serviceNmae, link in zip(
-            ornaStatusList, sp.find_all("span", class_="service-status--status")
-        ):
-            await ctx.send(
-                "{0:{2}<4}: {1:}".format(serviceNmae, link.text[1::], chr(12288))
-            )
-
     @commands.command(
         name="search", help="使用方法: ~search <要搜尋的東西> |搜尋規則或幫助: ~search help"
     )
