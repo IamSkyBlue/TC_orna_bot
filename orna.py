@@ -42,7 +42,10 @@ class Orna(commands.Cog):
         ]
         if not matchTitleRow:
             try:
-                await ctx.send("尚無資料，歡迎至 https://tinyurl.com/wxa9qxy 新增資料")
+                await ctx.send("尚無資料，歡迎至 <https://tinyurl.com/wxa9qxy> 新增資料")
+                await ctx.send(
+                    "或是可以到中文圖書館自己尋找有用的資訊 <https://hackmd.io/@Iamskyblue/Orna_TW_index>"
+                )
             except:
                 pass
             return
