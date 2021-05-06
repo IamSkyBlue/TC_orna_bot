@@ -26,11 +26,11 @@ class Orna(commands.Cog):
         help="使用方法: ~search <要搜尋的東西> |搜尋規則或幫助: ~search help| ~search index 可察看目錄",
     )
     async def search(self, ctx, name):
-        if name == "index" or name == "目錄":
+        if name == "index":
             result = sorted(wks.get_col(1, include_tailing_empty=False)[1::])
             await ctx.send("資料庫已有目錄: ")
             while result:
-                indexString = "```"
+                indexString = "```index"
                 while len(indexString) < 1900 and result:
                     indexItem = result.pop(0)
                     if indexItem:
