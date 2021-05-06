@@ -32,7 +32,9 @@ class Orna(commands.Cog):
             while result:
                 indexString = "```"
                 while len(indexString) < 1900 and result:
-                    indexString = indexString + "," + result.pop(0)
+                    indexItem = result.pop(0)
+                    if indexItem:
+                        indexString = indexString + "," + indexItem
                 await ctx.send(indexString + "```")
             return
 
