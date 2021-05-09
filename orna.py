@@ -27,7 +27,7 @@ class Orna(commands.Cog):
     )
     async def search(self, ctx, name):
         if name == "index":
-            result = sorted(wks.get_col(1, include_tailing_empty=False)[1::])
+            result = wks.get_col(1, include_tailing_empty=False)[1::]
             await ctx.send("資料庫已有目錄: ")
             while result:
                 indexString = "```index"
