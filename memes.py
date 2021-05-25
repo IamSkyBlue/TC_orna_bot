@@ -12,6 +12,9 @@ class Memes(commands.Cog):
         name="fightjpg", help='使用方法: ~fightjpg "第一格句子" "第二".....總共五個 中間記得空格'
     )
     async def fightjpg(self, ctx, *args):
+        if len(args) != 5:
+            await ctx.send("創建失敗，請輸入剛好5個句子")
+            return
         textheight = 300
         textlist = args
         img = Image.open("./src/imgs/origin.png")
