@@ -14,7 +14,8 @@ import requests
 load_dotenv()
 gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
 sh = gc.open("Ornabook")
-wks = sh[0]
+mainwks = sh[0]
+wordwks = sh[1]
 
 
 class Orna(commands.Cog):
@@ -27,7 +28,7 @@ class Orna(commands.Cog):
     )
     async def search(self, ctx, name):
         if name == "index":
-            result = wks.get_col(1, include_tailing_empty=False)[1::]
+            result = mainwks.get_col(1, include_tailing_empty=False)[1::]
             await ctx.send("資料庫已有目錄: ")
             while result:
                 indexString = "```index"
@@ -40,23 +41,36 @@ class Orna(commands.Cog):
 
         matchTitleRow = [
             title.row
-            for title in wks.get_col(1, returnas="cell", include_tailing_empty=False)[
-                1::
-            ]
+            for title in mainwks.get_col(
+                1, returnas="cell", include_tailing_empty=False
+            )[1::]
             if title.value == name
         ]
         if not matchTitleRow:
             try:
-                await ctx.send("尚無資料，歡迎至 <https://tinyurl.com/wxa9qxy> 新增資料")
+                await ctx.send(
+                    "主要資料庫無資料，已將詞彙加入待新增詞彙庫，歡迎至 <https://tinyurl.com/wxa9qxy> 新增資料"
+                )
                 await ctx.send(
                     "或是可以到中文圖書館自己尋找有用的資訊 <https://hackmd.io/@Iamskyblue/Orna_TW_index>"
                 )
-            except:
-                pass
+                matchTitleRow_wordwks = [
+                    title.row
+                    for title in wordwks.get_col(
+                        1, returnas="cell", include_tailing_empty=False
+                    )[1::]
+                    if title.value == name
+                ]
+                if not matchTitleRow_wordwks:
+                    wordwks.insert_rows(1, values=[name, "", "", "", "", ""])
+            except Exception as e:
+                print(e)
             return
         for row in matchTitleRow:
-            message = "\n---\n".join(wks.get_row(row, include_tailing_empty=False)[1::])
+            message = "\n---\n".join(
+                mainwks.get_row(row, include_tailing_empty=False)[1::]
+            )
             try:
                 await ctx.send(message)
-            except:
-                pass
+            except Exception as e:
+                print(e)
