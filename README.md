@@ -7,7 +7,8 @@
 Cogs 說明
 
 -   Orna 加載 Orna 相關功能
--   Poll 加載 Orna 相關功能
+-   Poll 加載 投票 相關功能
+-   Memes 加載 迷因圖片產生器 相關功能
 -   MCserver 加載私人 MC 伺服器相關功能(僅限特定伺服器使用)
 
 ---

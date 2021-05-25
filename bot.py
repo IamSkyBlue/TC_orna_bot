@@ -7,6 +7,7 @@ from discord.ext import commands, tasks
 from orna import Orna
 from poll import Poll
 from mcserver import MCserver
+from memes import Memes
 
 token = os.getenv("DISCORD_TOKEN")
 bot = commands.Bot(
@@ -24,6 +25,7 @@ async def on_ready():
     bot.add_cog(Orna(bot))
     bot.add_cog(Poll(bot))
     bot.add_cog(MCserver(bot))
+    bot.add_cog(Memes(bot))
     print("connected to Discord!")
 
 
