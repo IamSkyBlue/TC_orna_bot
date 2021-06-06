@@ -17,6 +17,9 @@ Ornabook = gc.open("Ornabook")
 mainwks = Ornabook[0]
 wordwks = Ornabook[1]
 
+OrnaTCDB = gc.open("OrnaTCDB")
+TCDBmainwks = OrnaTCDB[0]
+
 
 class Orna(commands.Cog):
     def __init__(self, bot):
@@ -74,6 +77,38 @@ class Orna(commands.Cog):
                 await ctx.send(message)
             except Exception as e:
                 print(e)
+
+    @commands.command(
+        name="translate",
+        help="使用方法: ~translate <要翻譯的東西> | 中英皆可，但必須要一字不差才能搜尋到",
+    )
+    async def translate(self, ctx, *searchctx):
+        name = " ".join(str(i) for i in searchctx)
+        name = name.lower()
+        if name.isascii():  # english to chinese
+            searchcol = 2
+            resultcol = 3
+        else:  # chinese to english
+            searchcol = 3
+            resultcol = 2
+
+        matchTitleRow = [
+            title.row
+            for title in TCDBmainwks.get_col(
+                searchcol, returnas="cell", include_tailing_empty=False
+            )[2::]
+            if title.value.lower() == name
+        ]
+        if not matchTitleRow:
+            updatetime = OrnaTCDB.updated[:10]
+            await ctx.send("資料庫中無符合資料，請注意是否有錯字，也可能是本資料庫未更新最新字串")
+            await ctx.send("本資料庫最後更新時間為: " + updatetime)
+            return
+
+        message = TCDBmainwks.cell(
+            (matchTitleRow[0], resultcol)
+        ).value  # some string has duplicate translate
+        await ctx.send(message)
 
 
 def setup(bot):
