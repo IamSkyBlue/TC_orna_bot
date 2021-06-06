@@ -13,9 +13,9 @@ import requests
 
 load_dotenv()
 gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
-sh = gc.open("Ornabook")
-mainwks = sh[0]
-wordwks = sh[1]
+Ornabook = gc.open("Ornabook")
+mainwks = Ornabook[0]
+wordwks = Ornabook[1]
 
 
 class Orna(commands.Cog):
@@ -74,3 +74,7 @@ class Orna(commands.Cog):
                 await ctx.send(message)
             except Exception as e:
                 print(e)
+
+
+def setup(bot):
+    bot.add_cog(Orna(bot))

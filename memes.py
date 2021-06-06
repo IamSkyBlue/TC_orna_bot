@@ -34,3 +34,7 @@ class Memes(commands.Cog):
         newimgname = str(uuid.uuid4()) + ".png"
         img.save(newimgname)
         await ctx.send(file=discord.File(newimgname))
+
+
+def setup(bot):
+    bot.add_cog(Memes(bot))

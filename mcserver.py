@@ -258,3 +258,7 @@ class MCserver(commands.Cog):
             except Exception as e:
                 await ctx.send("發生問題，請聯絡SkyBlue" + str(e))
                 return
+
+
+def setup(bot):
+    bot.add_cog(MCserver(bot))
