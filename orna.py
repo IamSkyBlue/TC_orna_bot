@@ -12,7 +12,7 @@ import pygsheets
 from google.cloud import vision
 
 load_dotenv()
-gc = pygsheets.authorize(service_account_env_var="GOOGLE_APPLICATION_CREDENTIALS")
+gc = pygsheets.authorize(service_account_env_var="GOOGLE_CREDENTIALS")
 Ornabook = gc.open("Ornabook")
 mainwks = Ornabook[0]
 wordwks = Ornabook[1]
