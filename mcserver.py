@@ -1,3 +1,8 @@
+"""
+This cog is for private use!
+If you fork from this repo, you can delete this file
+"""
+
 import os
 import requests
 import socket
