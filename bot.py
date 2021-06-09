@@ -1,5 +1,6 @@
 # encoding: utf-8
 import os
+import traceback
 
 import discord
 from discord.ext import commands, tasks
@@ -36,6 +37,21 @@ async def on_ready():
 @bot.event
 async def on_error(event, *args, **kwargs):
     print(traceback.format_exc())
+
+
+@bot.command()
+async def msgsend(ctx, msg, channelid: int):
+    if ctx.author.id in eval(os.getenv("STAFF_ID")):
+        channel = bot.get_channel(channelid)
+        await channel.send(msg)
+
+
+@bot.command()
+async def msgreply(ctx, msg, channelid: int, msgid: int):
+    if ctx.author.id in eval(os.getenv("STAFF_ID")):
+        channel = bot.get_channel(channelid)
+        message = await channel.fetch_message(msgid)
+        await message.reply(msg)
 
 
 bot.run(token)

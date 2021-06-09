@@ -124,6 +124,10 @@ class Orna(commands.Cog):
             (matchTitleRow[0], resultcol)
         ).value  # some string has duplicate translate
         await ctx.send(message)
+        if not name.isascii():  # chinese to english
+            searchstr = message.replace(" ", "+")
+            guideurl = "<https://orna.guide/search?searchstr=" + searchstr + ">"
+            await ctx.send(guideurl)
 
     @commands.command(
         name="subscribe",
@@ -212,7 +216,8 @@ class Orna(commands.Cog):
                 elif any(keyword in textlist[textindex] for keyword in MATCH_WORD_TC):
                     statstr += textlist[textindex]
             if not untrans_itemnamestr:
-                return  # can't find chinese keyword in the image, quit process
+                await ctx.channel.send("無法辨識圖片，請檢查左上角的裝備名稱是否被遮擋")
+                return
             for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
                 statstr = statstr.replace(TCstr, ENstr)
             statstr = statstr.replace(",", "")
@@ -232,6 +237,9 @@ class Orna(commands.Cog):
                 ]
                 allmatchTitleRow.extend(matchTitleRow)
                 strindex -= 1
+            if not allmatchTitleRow:
+                await ctx.channel.send("無法辨識圖片，請檢查左上角的裝備名稱是否被遮擋")
+                return
             itemnamestrindex = allmatchTitleRow[-1]  # max len match string
             itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
 
