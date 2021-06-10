@@ -279,6 +279,8 @@ class Orna(commands.Cog):
         levelstr = ""
         statstr = ""
         for textindex in range(0, len(textlist)):
+            if textlist[textindex] == "裝飾品":
+                break
             if textlist[textindex] == "儲藏室":
                 untrans_itemnamestr = textlist[textindex + 1]
                 if untrans_itemnamestr.startswith("*"):
