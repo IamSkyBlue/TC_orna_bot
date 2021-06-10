@@ -243,8 +243,11 @@ class Orna(commands.Cog):
                 textlist = self.img_text_detection_with_file(file)
             if not textlist:
                 await ctx.reply("無法辨識圖片中的文字")
+                return
             translated_strs = self.img_text_translate(textlist)
-
+            print("translated_strs: ", translated_strs)
+            if not translated_strs["itemnamestr"]:
+                ctx.reply("無法在資料庫中找到: " + translated_strs["untrans_itemnamestr"])
             searchstr = (
                 "%assess "
                 + translated_strs["itemnamestr"]
@@ -283,8 +286,8 @@ class Orna(commands.Cog):
                 break
             if textlist[textindex] == "儲藏室":
                 untrans_itemnamestr = textlist[textindex + 1]
-                if untrans_itemnamestr.startswith("*"):
-                    # sometimes Adornment slot will being detect as "*"s
+                if untrans_itemnamestr.startswith(("*", "O", "o", "0")):
+                    # sometimes Adornment slot will being detect as texts
                     untrans_itemnamestr = textlist[textindex + 2]
             elif textlist[textindex].startswith("等級"):
                 levelstr = textlist[textindex]
@@ -293,6 +296,7 @@ class Orna(commands.Cog):
                 levelstr = " (" + levelstr + ") "
             elif any(keyword in textlist[textindex] for keyword in MATCH_WORD_TC):
                 statstr += textlist[textindex]
+        print("untrans_itemnamestr: ", untrans_itemnamestr)
         if not untrans_itemnamestr:
             return  # can't find chinese keyword in the image, quit process
         allmatchTitleRow = []
@@ -314,7 +318,12 @@ class Orna(commands.Cog):
             statstr = statstr.replace(TCstr, ENstr)
             statstr = statstr.replace(",", "")  # 1,234 to 1234
         itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
-        return {"itemnamestr": itemnamestr, "levelstr": levelstr, "statstr": statstr}
+        return {
+            "itemnamestr": itemnamestr,
+            "levelstr": levelstr,
+            "statstr": statstr,
+            "untrans_itemnamestr": untrans_itemnamestr,
+        }
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
