@@ -1,10 +1,10 @@
 # encoding: utf-8
 import os
-import re
 import time
 
 import discord
 from discord.ext import commands, tasks
+
 from dotenv import load_dotenv
 
 import pygsheets
@@ -24,8 +24,44 @@ imgporcesschannels = OrnaTCDB[1]
 visionclient = vision.ImageAnnotatorClient()
 
 IMAGE_TYPE = ("jpeg", "png", "webp")
-MATCH_WORD_TC = ("血量:", "魔力:", "護盾:", "物攻:", "物防:", "敏捷:", "魔攻:", "魔防:")
-MATCH_WORD_EN = ("HP:", "Mana:", "Ward:", "Att:", "Def:", "Dex:", "Mag:", "Res:")
+MATCH_WORD_TC = (
+    "血量:",
+    "魔力:",
+    "護盾:",
+    "物攻:",
+    "物防:",
+    "敏捷:",
+    "魔攻:",
+    "魔防:",
+    "爆擊:",
+    "+視線範圍",
+    "-視線範圍",
+    "+經驗加成",
+    "-經驗加成",
+    "+金幣加成",
+    "-金幣加成",
+    "+歐幣加成",
+    "-歐幣加成",
+)
+MATCH_WORD_EN = (
+    "HP:",
+    "Mana:",
+    "Ward:",
+    "Att:",
+    "Def:",
+    "Dex:",
+    "Mag:",
+    "Res:",
+    "Crit:",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+)
 
 
 class Orna(commands.Cog):
@@ -181,7 +217,7 @@ class Orna(commands.Cog):
                 await ctx.send("已移除本頻道，可使用~subscribe再次訂閱")
                 return
 
-    async def process_img(self, ctx):
+    async def img_process(self, ctx):
         issubscribe = False
         for pair in self.imgporcesschannellist:
             if pair[0] == str(ctx.guild.id):
@@ -189,77 +225,99 @@ class Orna(commands.Cog):
                     issubscribe = True
         if not issubscribe:
             return
+        if time.time() - self.updatetime > 10:
+            self.imgporcesschannellist = imgporcesschannels.get_all_values(
+                returnas="matrix",
+                majdim="ROWS",
+                include_tailing_empty=False,
+                include_tailing_empty_rows=False,
+            )[1::]
+            self.updatetime = time.time()
         for att in ctx.attachments:
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
                 return
+            textlist = self.img_text_detection_with_url(att.url)
+            if not textlist:  # sometims google can't access the url
+                file = await att.read()
+                textlist = self.img_text_detection_with_file(file)
+            if not textlist:
+                await ctx.reply("無法辨識圖片中的文字")
+            translated_strs = self.img_text_translate(textlist)
 
-            image = vision.Image()
-            image.source.image_uri = att.url
-            response = visionclient.text_detection(image=image)
-            texts = response.text_annotations
-            if not texts:
-                return  # exceed limit or something
-
-            textlist = texts[0].description.split("\n")
-            untrans_itemnamestr = ""
-            levelstr = ""
-            statstr = ""
-            for textindex in range(0, len(textlist)):
-                if textlist[textindex] == "儲藏室":
-                    untrans_itemnamestr = textlist[textindex - 1]
-                elif textlist[textindex].startswith("等級"):
-                    levelstr = textlist[textindex]
-                    levelstr = levelstr.replace(" ", "")
-                    levelstr = levelstr.replace("等級", "")
-                    levelstr = " (" + levelstr + ") "
-                elif any(keyword in textlist[textindex] for keyword in MATCH_WORD_TC):
-                    statstr += textlist[textindex]
-            if not untrans_itemnamestr:
-                await ctx.channel.send("無法辨識圖片，請檢查左上角的裝備名稱是否被遮擋")
-                return
-            for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
-                statstr = statstr.replace(TCstr, ENstr)
-            statstr = statstr.replace(",", "")
-            if not levelstr:
-                levelstr = " (1) "
-
-            allmatchTitleRow = []
-            data = TCDBmainwks.get_col(3, returnas="cell", include_tailing_empty=False)[
-                2::
-            ]
-            strindex = len(untrans_itemnamestr) - 1
-            while strindex >= 0:  # loop search DB using [-1::],[-2::].....[0::]
-                matchTitleRow = [
-                    title.row
-                    for title in data
-                    if title.value.lower() == untrans_itemnamestr[strindex::]
-                ]
-                allmatchTitleRow.extend(matchTitleRow)
-                strindex -= 1
-            if not allmatchTitleRow:
-                await ctx.channel.send("無法辨識圖片，請檢查左上角的裝備名稱是否被遮擋")
-                return
-            itemnamestrindex = allmatchTitleRow[-1]  # max len match string
-            itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
-
-            searchstr = "`%assess " + itemnamestr + levelstr + statstr + "`"
+            searchstr = (
+                "%assess "
+                + translated_strs["itemnamestr"]
+                + translated_strs["levelstr"]
+                + translated_strs["statstr"]
+            )
             searchstr = searchstr.replace("\n", " ")
             searchstr = searchstr.replace("  ", " ")
-            await ctx.channel.send(searchstr)
+            await ctx.reply(searchstr)
+
+    def img_text_detection_with_url(self, url):
+        image = vision.Image()
+        image.source.image_uri = url
+        response = visionclient.text_detection(image=image)
+        if "text_annotations" not in response:
+            print("Google API error:", response.error)  # logging
+            return
+        textlist = response.text_annotations[0].description.split("\n")
+        return textlist
+
+    def img_text_detection_with_file(self, file):
+        image = vision.Image(content=file)
+        response = visionclient.text_detection(image=image)
+        if "text_annotations" not in response:
+            print("Google API error: ", response.error)  # logging
+            return
+        textlist = response.text_annotations[0].description.split("\n")
+        return textlist
+
+    def img_text_translate(self, textlist):
+        untrans_itemnamestr = ""
+        levelstr = ""
+        statstr = ""
+        for textindex in range(0, len(textlist)):
+            if textlist[textindex] == "儲藏室":
+                untrans_itemnamestr = textlist[textindex + 1]
+                if untrans_itemnamestr.startswith("*"):
+                    # sometimes Adornment slot will being detect as "*"s
+                    untrans_itemnamestr = textlist[textindex + 2]
+            elif textlist[textindex].startswith("等級"):
+                levelstr = textlist[textindex]
+                levelstr = levelstr.replace(" ", "")
+                levelstr = levelstr.replace("等級", "")
+                levelstr = " (" + levelstr + ") "
+            elif any(keyword in textlist[textindex] for keyword in MATCH_WORD_TC):
+                statstr += textlist[textindex]
+        if not untrans_itemnamestr:
+            return  # can't find chinese keyword in the image, quit process
+        allmatchTitleRow = []
+        data = TCDBmainwks.get_col(3, returnas="cell", include_tailing_empty=False)[2::]
+        strindex = len(untrans_itemnamestr) - 1
+        while strindex >= 0:  # loop search DB using [-1::],[-2::].....[0::]
+            matchTitleRow = [
+                title.row
+                for title in data
+                if title.value.lower() == untrans_itemnamestr[strindex::]
+            ]
+            allmatchTitleRow.extend(matchTitleRow)
+            strindex -= 1
+        itemnamestrindex = allmatchTitleRow[-1]  # max len match string
+        if not levelstr:
+            levelstr = " (1) "
+        for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
+            statstr = statstr.replace(" ", "")
+            statstr = statstr.replace(TCstr, ENstr)
+            statstr = statstr.replace(",", "")  # 1,234 to 1234
+        itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
+        return {"itemnamestr": itemnamestr, "levelstr": levelstr, "statstr": statstr}
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
         if ctx.attachments:
-            if time.time() - self.updatetime > 10:
-                self.imgporcesschannellist = imgporcesschannels.get_all_values(
-                    returnas="matrix",
-                    majdim="ROWS",
-                    include_tailing_empty=False,
-                    include_tailing_empty_rows=False,
-                )[1::]
-                self.updatetime = time.time()
-            await self.process_img(ctx)
+            await self.img_process(ctx)
 
 
 def setup(bot):
