@@ -41,13 +41,13 @@ class Orna(commands.Cog):
                         indexString = indexString + "," + indexItem
                 await ctx.send(indexString + "```")
             return
-
+        titlelist = mainwks.get_col(1, returnas="cell", include_tailing_empty=False)[
+            1::
+        ]
         matchTitleRow = [
             title.row
-            for title in mainwks.get_col(
-                1, returnas="cell", include_tailing_empty=False
-            )[1::]
-            if title.value == name
+            for title in titlelist
+            if name in [item.strip() for item in title.value.split(",")]
         ]
         if not matchTitleRow:
             try:
