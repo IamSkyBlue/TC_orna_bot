@@ -17,6 +17,7 @@ gc = pygsheets.authorize(service_account_env_var="GOOGLE_CREDENTIALS")
 OrnaTCDB = gc.open("OrnaTCDB")
 TCDBmainwks = OrnaTCDB[0]
 imgporcesschannels = OrnaTCDB[1]
+correctionsheet = OrnaTCDB[2]
 
 visionclient = vision.ImageAnnotatorClient()
 
@@ -164,14 +165,16 @@ class Ornaimg(commands.Cog):
                 # this mean the img is not game screenshot
                 await ctx.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
                 return
-            itemnamestr = self.img_text_translate(
+            itemnamestr = self.translate_correction(
                 translated_strs["untrans_itemnamestr"]
             )
+            itemnamestr = self.img_text_translate(itemnamestr)
             if itemnamestr == "":
                 translated_strs = self.img_find_strings(textlist, True)
-                itemnamestr = self.img_text_translate(
+                itemnamestr = self.translate_correction(
                     translated_strs["untrans_itemnamestr"]
                 )
+                itemnamestr = self.img_text_translate(itemnamestr)
             levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
             levelstatstr = levelstatstr.replace("\n", " ")
             levelstatstr = levelstatstr.replace("  ", " ")
@@ -269,6 +272,17 @@ class Ornaimg(commands.Cog):
             itemnamestrindex = allmatchTitleRow[0]
         itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
         return itemnamestr
+
+    def translate_correction(self, itemstring):
+        correctionlist = correctionsheet.get_all_values(
+            returnas="matrix",
+            majdim="ROWS",
+            include_tailing_empty=False,
+            include_tailing_empty_rows=False,
+        )[1::]
+        for pair in correctionlist:
+            itemstring = itemstring.replace(pair[0], pair[1])
+        return itemstring
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
