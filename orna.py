@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 
 import pygsheets
 
-from google.cloud import vision
-
 load_dotenv()
 gc = pygsheets.authorize(service_account_env_var="GOOGLE_CREDENTIALS")
 Ornabook = gc.open("Ornabook")
@@ -21,59 +19,10 @@ OrnaTCDB = gc.open("OrnaTCDB")
 TCDBmainwks = OrnaTCDB[0]
 imgporcesschannels = OrnaTCDB[1]
 
-visionclient = vision.ImageAnnotatorClient()
-
-IMAGE_TYPE = ("jpeg", "png", "webp")
-MATCH_WORD_TC = (
-    "血量:",
-    "魔力:",
-    "護盾:",
-    "物攻:",
-    "物防:",
-    "敏捷:",
-    "魔攻:",
-    "魔防:",
-    "爆擊:",
-    "+視線範圍",
-    "-視線範圍",
-    "+經驗加成",
-    "-經驗加成",
-    "+金幣加成",
-    "-金幣加成",
-    "+歐幣加成",
-    "-歐幣加成",
-)
-MATCH_WORD_EN = (
-    "HP:",
-    "Mana:",
-    "Ward:",
-    "Att:",
-    "Def:",
-    "Dex:",
-    "Mag:",
-    "Res:",
-    "Crit:",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-)
-
 
 class Orna(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.updatetime = time.time()
-        self.imgporcesschannellist = imgporcesschannels.get_all_values(
-            returnas="matrix",
-            majdim="ROWS",
-            include_tailing_empty=False,
-            include_tailing_empty_rows=False,
-        )[1::]
 
     @commands.command(
         name="search",
@@ -164,171 +113,6 @@ class Orna(commands.Cog):
             searchstr = message.replace(" ", "+")
             guideurl = "<https://orna.guide/search?searchstr=" + searchstr + ">"
             await ctx.send(guideurl)
-
-    @commands.command(
-        name="subscribe",
-        help="使用方法: ~subscribe | 使中文機器人監聽此頻道的圖片並嘗試辨識",
-    )
-    async def subscribe(self, ctx, *args):
-        channelmatrix = imgporcesschannels.get_all_values(
-            returnas="cell",
-            majdim="ROWS",
-            include_tailing_empty=False,
-            include_tailing_empty_rows=False,
-        )[1::]
-        otherregistered = False
-        for pair in channelmatrix:
-            if (
-                str(ctx.guild.id) == pair[0].value
-                and str(ctx.channel.id) == pair[1].value
-            ):
-                await ctx.send("本頻道已註冊過，無須再進行註冊")
-                return
-            elif (
-                str(ctx.guild.id) == pair[0].value
-                and str(ctx.channel.id) != pair[1].value
-            ):
-                otherregistered = True
-        imgporcesschannels.insert_rows(
-            1, values=[str(ctx.guild.id), str(ctx.channel.id)]
-        )
-        if otherregistered:
-            await ctx.send("成功註冊本頻道，偵測到其他頻道也有註冊\n若其他頻道轉為其他用途，記得使用~unsubscribe退出監聽頻道")
-        else:
-            await ctx.send("成功註冊本頻道，請注意10秒後機器人才會開始監聽本頻道")
-
-    @commands.command(
-        name="unsubscribe",
-        help="使用方法: ~unsubscribe | 移除中文機器人對此頻道的監聽",
-    )
-    async def unsubscribe(self, ctx, *args):
-        channelmatrix = imgporcesschannels.get_all_values(
-            returnas="cell",
-            majdim="ROWS",
-            include_tailing_empty=False,
-            include_tailing_empty_rows=False,
-        )
-        for pair in channelmatrix:
-            if (
-                str(ctx.guild.id) == pair[0].value
-                and str(ctx.channel.id) == pair[1].value
-            ):
-                imgporcesschannels.delete_rows(pair[0].row)
-                await ctx.send("已移除本頻道，可使用~subscribe再次訂閱")
-                return
-
-    async def img_process(self, ctx):
-        issubscribe = False
-        for pair in self.imgporcesschannellist:
-            if pair[0] == str(ctx.guild.id):
-                if pair[1] == str(ctx.channel.id):
-                    issubscribe = True
-        if not issubscribe:
-            return
-        if time.time() - self.updatetime > 10:
-            self.imgporcesschannellist = imgporcesschannels.get_all_values(
-                returnas="matrix",
-                majdim="ROWS",
-                include_tailing_empty=False,
-                include_tailing_empty_rows=False,
-            )[1::]
-            self.updatetime = time.time()
-        for att in ctx.attachments:
-            attname = att.content_type.split("/")[1]
-            if attname not in IMAGE_TYPE:
-                return
-            textlist = self.img_text_detection_with_url(att.url)
-            if not textlist:  # sometims google can't access the url
-                file = await att.read()
-                textlist = self.img_text_detection_with_file(file)
-            if not textlist:
-                await ctx.reply("無法辨識圖片中的文字")
-                return
-            translated_strs = self.img_text_translate(textlist)
-            print("translated_strs: ", translated_strs)
-            if not translated_strs["itemnamestr"]:
-                ctx.reply("無法在資料庫中找到: " + translated_strs["untrans_itemnamestr"])
-            searchstr = (
-                "%assess "
-                + translated_strs["itemnamestr"]
-                + translated_strs["levelstr"]
-                + translated_strs["statstr"]
-            )
-            searchstr = searchstr.replace("\n", " ")
-            searchstr = searchstr.replace("  ", " ")
-            await ctx.reply(searchstr)
-
-    def img_text_detection_with_url(self, url):
-        image = vision.Image()
-        image.source.image_uri = url
-        response = visionclient.text_detection(image=image)
-        if "text_annotations" not in response:
-            print("Google API error:", response.error)  # logging
-            return
-        textlist = response.text_annotations[0].description.split("\n")
-        return textlist
-
-    def img_text_detection_with_file(self, file):
-        image = vision.Image(content=file)
-        response = visionclient.text_detection(image=image)
-        if "text_annotations" not in response:
-            print("Google API error: ", response.error)  # logging
-            return
-        textlist = response.text_annotations[0].description.split("\n")
-        return textlist
-
-    def img_text_translate(self, textlist):
-        untrans_itemnamestr = ""
-        levelstr = ""
-        statstr = ""
-        for textindex in range(0, len(textlist)):
-            if textlist[textindex] == "裝飾品":
-                break
-            if textlist[textindex] == "儲藏室":
-                untrans_itemnamestr = textlist[textindex + 1]
-                if untrans_itemnamestr.startswith(("*", "O", "o", "0")):
-                    # sometimes Adornment slot will being detect as texts
-                    untrans_itemnamestr = textlist[textindex + 2]
-            elif textlist[textindex].startswith("等級"):
-                levelstr = textlist[textindex]
-                levelstr = levelstr.replace(" ", "")
-                levelstr = levelstr.replace("等級", "")
-                levelstr = " (" + levelstr + ") "
-            elif any(keyword in textlist[textindex] for keyword in MATCH_WORD_TC):
-                statstr += textlist[textindex]
-        print("untrans_itemnamestr: ", untrans_itemnamestr)
-        if not untrans_itemnamestr:
-            return  # can't find chinese keyword in the image, quit process
-        allmatchTitleRow = []
-        data = TCDBmainwks.get_col(3, returnas="cell", include_tailing_empty=False)[2::]
-        strindex = len(untrans_itemnamestr) - 1
-        while strindex >= 0:  # loop search DB using [-1::],[-2::].....[0::]
-            matchTitleRow = [
-                title.row
-                for title in data
-                if title.value.lower() == untrans_itemnamestr[strindex::]
-            ]
-            allmatchTitleRow.extend(matchTitleRow)
-            strindex -= 1
-        itemnamestrindex = allmatchTitleRow[-1]  # max len match string
-        if not levelstr:
-            levelstr = " (1) "
-        for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
-            statstr = statstr.replace(" ", "")
-            statstr = statstr.replace(TCstr, ENstr)
-            statstr = statstr.replace(",", "")  # 1,234 to 1234
-        itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
-        return {
-            "itemnamestr": itemnamestr,
-            "levelstr": levelstr,
-            "statstr": statstr,
-            "untrans_itemnamestr": untrans_itemnamestr,
-        }
-
-    @commands.Cog.listener()
-    async def on_message(self, ctx):
-        if ctx.attachments:
-            await self.img_process(ctx)
 
 
 def setup(bot):

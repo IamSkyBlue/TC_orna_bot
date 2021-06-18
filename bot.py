@@ -16,6 +16,7 @@ bot = commands.Bot(
 )
 
 bot.load_extension("orna")
+bot.load_extension("ornaimg")
 bot.load_extension("poll")
 bot.load_extension("memes")
 
