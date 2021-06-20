@@ -184,7 +184,7 @@ class Ornaimg(commands.Cog):
                 await ctx.reply(
                     "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
                 )
-                await ctx.channel.send("可能是隨機產稱的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
+                await ctx.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
                 await ctx.channel.send(
                     "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
                 )
@@ -225,14 +225,17 @@ class Ornaimg(commands.Cog):
                     untrans_itemnamestr = textlist[textindex - 1]
                 else:
                     untrans_itemnamestr = textlist[textindex + 1]
-                    if untrans_itemnamestr.startswith(("*", "O", "o", "0")):
+                    indexcount = 0
+                    while (
+                        untrans_itemnamestr.startswith(
+                            ("*", "O", "o", "0", "1", "x", "X", ".", ",", "w", "W")
+                        )
+                        or len(untrans_itemnamestr) < 2
+                    ):
+                        indexcount += 1
                         # sometimes Adornment slot will being detect as texts
-                        textindex += 1
-                    if (
-                        len(untrans_itemnamestr) < 2
-                    ):  # sometimes icon of the eq will being detect as text
-                        textindex += 1
-                    untrans_itemnamestr = textlist[textindex + 1]
+                        untrans_itemnamestr = textlist[textindex + 1 + indexcount]
+
             elif textlist[textindex].startswith("等級"):
                 levelstr = textlist[textindex]
                 levelstr = levelstr.replace(" ", "")
