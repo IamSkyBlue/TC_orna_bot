@@ -165,32 +165,36 @@ class Ornaimg(commands.Cog):
                 # this mean the img is not game screenshot
                 await ctx.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
                 return
-            itemnamestr = self.translate_correction(
-                translated_strs["untrans_itemnamestr"]
-            )
-            itemnamestr = self.img_text_translate(itemnamestr)
-            if itemnamestr == "":
-                translated_strs = self.img_find_strings(textlist, True)
+            if not translated_strs["istranslated"]:
+                # the itemname need translation only if it is chinese
                 itemnamestr = self.translate_correction(
                     translated_strs["untrans_itemnamestr"]
                 )
                 itemnamestr = self.img_text_translate(itemnamestr)
+            else:
+                itemnamestr = ""
             levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
             levelstatstr = levelstatstr.replace("\n", " ")
             levelstatstr = levelstatstr.replace("  ", " ")
             if not itemnamestr:
-                # if first try and second try all failed at this point
+                # if img_text_translate return an empty string
                 # this mean the name of the item can not be found in the ornaTCDB
-                await ctx.reply(
-                    "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
-                )
-                await ctx.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
+                if translated_strs["istranslated"]:
+                    await ctx.reply("英文物品名稱: " + translated_strs["untrans_itemnamestr"])
+                    await ctx.channel.send("本機器人非設計給原本就是英文名稱的物品，請將介面語言切換成英文直接使用ornabot")
+                else:
+                    await ctx.reply(
+                        "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
+                    )
+                    await ctx.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
                 await ctx.channel.send(
                     "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
                 )
                 return
             searchstr = "%assess " + itemnamestr + levelstatstr
             await ctx.reply(searchstr)
+            if translated_strs["hasadornment"]:
+                await ctx.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再貼上")
 
     def img_text_detection_with_url(self, url):
         image = vision.Image()
@@ -215,8 +219,11 @@ class Ornaimg(commands.Cog):
         untrans_itemnamestr = ""
         levelstr = ""
         statstr = ""
+        hasadornment = False
+        istranslated = False
         for textindex in range(0, len(textlist)):
             if textlist[textindex] == "裝飾品":
+                hasadornment = True
                 break
             if textlist[textindex] == "儲藏室":
                 if (
@@ -227,13 +234,20 @@ class Ornaimg(commands.Cog):
                     untrans_itemnamestr = textlist[textindex + 1]
                     indexcount = 0
                     while (
-                        untrans_itemnamestr.startswith(
-                            ("*", "O", "o", "0", "1", "x", "X", ".", ",", "w", "W")
-                        )
+                        untrans_itemnamestr[0].isascii()
                         or len(untrans_itemnamestr) < 2
+                        or untrans_itemnamestr.startswith(("中", "回"))
                     ):
+                        if (
+                            len(untrans_itemnamestr) > 10
+                            and untrans_itemnamestr.isascii()
+                            and not untrans_itemnamestr.startswith(("OO", "oo", "00"))
+                        ):
+                            # the item name is already english
+                            istranslated = True
+                            break
                         indexcount += 1
-                        # sometimes Adornment slot will being detect as texts
+                        # sometimes Adornment slot or item img will being detect as texts
                         untrans_itemnamestr = textlist[textindex + 1 + indexcount]
 
             elif textlist[textindex].startswith("等級"):
@@ -253,6 +267,8 @@ class Ornaimg(commands.Cog):
             "untrans_itemnamestr": untrans_itemnamestr,
             "levelstr": levelstr,
             "statstr": statstr,
+            "hasadornment": hasadornment,
+            "istranslated": istranslated,
         }
 
     def img_text_translate(self, untrans_itemnamestr):
