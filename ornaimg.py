@@ -165,6 +165,9 @@ class Ornaimg(commands.Cog):
                 # this mean the img is not game screenshot
                 await ctx.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
                 return
+            if translated_strs["israndom"]:
+                await ctx.reply("ornabot無法辨識隨機產生的物品")
+                return
             if not translated_strs["istranslated"]:
                 # the itemname need translation only if it is chinese
                 itemnamestr = self.translate_correction(
@@ -220,10 +223,14 @@ class Ornaimg(commands.Cog):
         levelstr = ""
         statstr = ""
         hasadornment = False
+        israndom = False
         istranslated = False
         for textindex in range(0, len(textlist)):
             if textlist[textindex] == "裝飾品":
                 hasadornment = True
+                break
+            if "隨機產生" in textlist[textindex]:
+                israndom = True
                 break
             if textlist[textindex] == "儲藏室":
                 if (
@@ -268,6 +275,7 @@ class Ornaimg(commands.Cog):
             "levelstr": levelstr,
             "statstr": statstr,
             "hasadornment": hasadornment,
+            "israndom": israndom,
             "istranslated": istranslated,
         }
 
