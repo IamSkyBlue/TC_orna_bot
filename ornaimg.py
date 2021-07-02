@@ -31,7 +31,7 @@ MATCH_WORD_TC = (
     "敏捷:",
     "魔攻:",
     "魔防:",
-    "爆擊:",
+    "暴擊:",
     "+視線範圍",
     "-視線範圍",
     "+經驗加成",
@@ -42,6 +42,8 @@ MATCH_WORD_TC = (
     "-歐幣加成",
     "+幸運加成",
     "-幸運加成",
+    "+跟隨者行動",
+    "-跟隨者行動",
 )
 MATCH_WORD_EN = (
     "HP:",
@@ -53,6 +55,8 @@ MATCH_WORD_EN = (
     "Mag:",
     "Res:",
     "Crit:",
+    "",
+    "",
     "",
     "",
     "",
@@ -266,10 +270,14 @@ class Ornaimg(commands.Cog):
                 statstr += textlist[textindex]
         if not levelstr:
             levelstr = " (1) "
-        for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
-            statstr = statstr.replace(TCstr, ENstr)
         statstr = statstr.replace(" ", "")
         statstr = statstr.replace(",", "")  # 1,234 to 1234
+        statstr = statstr.replace("—", "-")
+        statstr = statstr.replace("o", "0")
+        statstr = statstr.replace("O", "0")
+        for TCstr, ENstr in zip(MATCH_WORD_TC, MATCH_WORD_EN):
+            statstr = statstr.replace(TCstr, ENstr)
+
         return {
             "untrans_itemnamestr": untrans_itemnamestr,
             "levelstr": levelstr,
