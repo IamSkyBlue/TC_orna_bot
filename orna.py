@@ -27,6 +27,7 @@ class Orna(commands.Cog):
     @commands.command(
         name="search",
         help="使用方法: ~search <要搜尋的東西> |搜尋規則或幫助: ~search help| ~search index 可察看目錄",
+        brief="從共享的google試算表搜尋資料",
     )
     async def search(self, ctx, *searchctx):
         name = " ".join(str(i) for i in searchctx)
@@ -81,6 +82,7 @@ class Orna(commands.Cog):
     @commands.command(
         name="translate",
         help="使用方法: ~translate <要翻譯的東西> | 中英皆可，但必須要一字不差才能搜尋到",
+        brief="將遊戲資料庫搜尋翻譯資料",
     )
     async def translate(self, ctx, *searchctx):
         name = " ".join(str(i) for i in searchctx)

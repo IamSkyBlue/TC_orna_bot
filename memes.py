@@ -9,7 +9,9 @@ class Memes(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        name="fightjpg", help='使用方法: ~fightjpg "第一格句子" "第二".....總共五個 中間記得空格'
+        name="fightjpg",
+        help='使用方法: ~fightjpg "第一格句子" "第二".....總共五個 中間記得空格',
+        brief="產生迷因圖片",
     )
     async def fightjpg(self, ctx, *args):
         if len(args) != 5:

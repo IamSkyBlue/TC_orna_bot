@@ -6,7 +6,11 @@ class Poll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="poll", help='使用方法: ~poll "投票名稱" "項目一" "項目二"..... 中間記得空格')
+    @commands.command(
+        name="poll",
+        help='使用方法: ~poll "投票名稱" "項目一" "項目二"..... 中間記得空格',
+        brief="創建投票",
+    )
     async def poll(self, ctx, *args):
         emojiLetters = [
             "\N{REGIONAL INDICATOR SYMBOL LETTER A}",

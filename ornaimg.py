@@ -84,6 +84,7 @@ class Ornaimg(commands.Cog):
     @commands.command(
         name="subscribe",
         help="使用方法: ~subscribe | 使中文機器人監聽此頻道的圖片並嘗試辨識",
+        brief="新增頻道至截圖自動辨識名單",
     )
     async def subscribe(self, ctx, *args):
         channelmatrix = imgporcesschannels.get_all_values(
@@ -116,6 +117,7 @@ class Ornaimg(commands.Cog):
     @commands.command(
         name="unsubscribe",
         help="使用方法: ~unsubscribe | 移除中文機器人對此頻道的監聽",
+        brief="將此頻道從截圖自動辨識名單移除",
     )
     async def unsubscribe(self, ctx, *args):
         channelmatrix = imgporcesschannels.get_all_values(

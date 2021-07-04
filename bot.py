@@ -9,10 +9,16 @@ from orna import Orna
 from poll import Poll
 from mcserver import MCserver
 from memes import Memes
+from help import TCHelp
 
 token = os.getenv("DISCORD_TOKEN")
 STAFF_IDS = eval(os.getenv("STAFF_ID"))
-bot = commands.Bot(command_prefix="~", description="台灣社群Orna字典機器人", owner_ids=STAFF_IDS)
+bot = commands.Bot(
+    command_prefix="~",
+    description="台灣社群Orna字典機器人",
+    owner_ids=STAFF_IDS,
+    help_command=TCHelp(),
+)
 
 bot.load_extension("orna")
 bot.load_extension("ornaimg")
