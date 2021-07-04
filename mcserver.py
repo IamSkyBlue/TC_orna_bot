@@ -170,7 +170,9 @@ class MCserver(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="mc-status", help="伺服器狀態 使用方法: ~mc-status")
+    @commands.command(
+        name="mc-status", help="(私人功能)伺服器狀態 使用方法: ~mc-status", hidden=True
+    )
     async def mc_status(self, ctx, *args):
         if ctx.guild.id not in ALLOW_GUILD:
             await ctx.send("這是私人的伺服器喔~抱歉")
@@ -195,7 +197,7 @@ class MCserver(commands.Cog):
             else:
                 await ctx.send("但沒有人在線上QQ")
 
-    @commands.command(name="mc-on", help="開啟伺服器 使用方法: ~mc-on")
+    @commands.command(name="mc-on", help="(私人功能)開啟伺服器 使用方法: ~mc-on", hidden=True)
     async def mc_on(self, ctx, *args):
         if ctx.guild.id not in ALLOW_GUILD:
             await ctx.send("這是私人的伺服器喔~抱歉")
@@ -237,7 +239,7 @@ class MCserver(commands.Cog):
             else:
                 await ctx.send("發生問題，請聯絡SkyBlue")
 
-    @commands.command(name="mc-off", help="關閉伺服器 使用方法: ~mc-off")
+    @commands.command(name="mc-off", help="(私人功能)關閉伺服器 使用方法: ~mc-off", hidden=True)
     async def mc_off(self, ctx, *args):
         if ctx.guild.id not in ALLOW_GUILD:
             await ctx.send("這是私人的伺服器喔~抱歉")
