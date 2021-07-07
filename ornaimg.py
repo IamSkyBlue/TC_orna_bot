@@ -1,6 +1,7 @@
 # encoding: utf-8
 import os
 import time
+import re
 
 import discord
 from discord.ext import commands, tasks
@@ -135,14 +136,7 @@ class Ornaimg(commands.Cog):
                 await ctx.send("已移除本頻道，可使用~subscribe再次訂閱")
                 return
 
-    async def img_process(self, ctx):
-        issubscribe = False
-        for pair in self.imgporcesschannellist:
-            if pair[0] == str(ctx.guild.id):
-                if pair[1] == str(ctx.channel.id):
-                    issubscribe = True
-        if not issubscribe:
-            return
+    async def is_subscribe(self, ctx) -> bool:
         if time.time() - self.updatetime > 10:
             self.imgporcesschannellist = imgporcesschannels.get_all_values(
                 returnas="matrix",
@@ -151,6 +145,24 @@ class Ornaimg(commands.Cog):
                 include_tailing_empty_rows=False,
             )[1::]
             self.updatetime = time.time()
+        issubscribe = False
+        for pair in self.imgporcesschannellist:
+            if pair[0] == str(ctx.guild.id) and pair[1] == str(ctx.channel.id):
+                issubscribe = True
+        return issubscribe
+
+    async def ornate_emoji(self, ctx):
+        if not await self.is_subscribe(ctx):
+            return
+        for embed in ctx.embeds:
+            match = re.match(r"Quality: (\d+)%", embed.description)
+            quality = int(match.group(1))
+            if 195 <= quality <= 200:
+                await ctx.add_reaction("🥳")
+
+    async def img_process(self, ctx):
+        if not await self.is_subscribe(ctx):
+            return
         for att in ctx.attachments:
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
@@ -325,6 +337,8 @@ class Ornaimg(commands.Cog):
     async def on_message(self, ctx):
         if ctx.attachments:
             await self.img_process(ctx)
+        elif ctx.embeds:
+            await self.ornate_emoji(ctx)
 
 
 def setup(bot):
