@@ -335,7 +335,7 @@ class Ornaimg(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if ctx.attachments:
+        if ctx.attachments and not ctx.author.bot:
             await self.img_process(ctx)
         elif ctx.embeds:
             await self.ornate_emoji(ctx)
