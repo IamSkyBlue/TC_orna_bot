@@ -167,17 +167,17 @@ class Ornaimg(commands.Cog):
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
                 return
-            textlist = self.img_text_detection_with_url(att.url)
+            textlist = await self.img_text_detection_with_url(att.url)
             if not textlist:  # sometims google can't access the url
                 file = await att.read()
-                textlist = self.img_text_detection_with_file(file)
+                textlist = await self.img_text_detection_with_file(file)
             if not textlist:
                 await ctx.reply("無法辨識圖片中的文字")
                 return
-            translated_strs = self.img_find_strings(textlist, False)
+            translated_strs = await self.img_find_strings(textlist, False)
             print("translated_strs: ", translated_strs)
             if translated_strs["untrans_itemnamestr"] == "":
-                translated_strs = self.img_find_strings(textlist, True)
+                translated_strs = await self.img_find_strings(textlist, True)
             if translated_strs["untrans_itemnamestr"] == "":
                 # if first try and second try all failed at this point
                 # this mean the img is not game screenshot
@@ -188,10 +188,10 @@ class Ornaimg(commands.Cog):
                 return
             if not translated_strs["istranslated"]:
                 # the itemname need translation only if it is chinese
-                itemnamestr = self.translate_correction(
+                itemnamestr = await self.translate_correction(
                     translated_strs["untrans_itemnamestr"]
                 )
-                itemnamestr = self.img_text_translate(itemnamestr)
+                itemnamestr = await self.img_text_translate(itemnamestr)
             else:
                 itemnamestr = ""
             levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
@@ -217,7 +217,7 @@ class Ornaimg(commands.Cog):
             if translated_strs["hasadornment"]:
                 await ctx.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再貼上")
 
-    def img_text_detection_with_url(self, url):
+    async def img_text_detection_with_url(self, url):
         image = vision.Image()
         image.source.image_uri = url
         response = visionclient.text_detection(image=image)
@@ -227,7 +227,7 @@ class Ornaimg(commands.Cog):
         textlist = response.text_annotations[0].description.split("\n")
         return textlist
 
-    def img_text_detection_with_file(self, file):
+    async def img_text_detection_with_file(self, file):
         image = vision.Image(content=file)
         response = visionclient.text_detection(image=image)
         if "text_annotations" not in response:
@@ -236,7 +236,7 @@ class Ornaimg(commands.Cog):
         textlist = response.text_annotations[0].description.split("\n")
         return textlist
 
-    def img_find_strings(self, textlist, secondtry: bool):
+    async def img_find_strings(self, textlist, secondtry: bool):
         untrans_itemnamestr = ""
         levelstr = ""
         statstr = ""
@@ -303,7 +303,7 @@ class Ornaimg(commands.Cog):
             "istranslated": istranslated,
         }
 
-    def img_text_translate(self, untrans_itemnamestr):
+    async def img_text_translate(self, untrans_itemnamestr):
         allmatchTitleRow = []
         data = TCDBmainwks.get_col(3, returnas="cell", include_tailing_empty=False)[2::]
         strindex = len(untrans_itemnamestr) - 1
@@ -324,7 +324,7 @@ class Ornaimg(commands.Cog):
         itemnamestr = TCDBmainwks.cell((itemnamestrindex, 2)).value
         return itemnamestr
 
-    def translate_correction(self, itemstring):
+    async def translate_correction(self, itemstring):
         correctionlist = correctionsheet.get_all_values(
             returnas="matrix",
             majdim="ROWS",
