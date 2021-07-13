@@ -266,7 +266,9 @@ class Ornaimg(commands.Cog):
                         if (
                             len(untrans_itemnamestr) > 10
                             and untrans_itemnamestr.isascii()
-                            and not untrans_itemnamestr.startswith(("OO", "oo", "00"))
+                            and not untrans_itemnamestr.startswith(
+                                ("OO", "oo", "00", "*")
+                            )
                         ):
                             # the item name is already english
                             istranslated = True
