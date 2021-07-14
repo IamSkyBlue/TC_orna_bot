@@ -397,7 +397,7 @@ class Ornaimg(commands.Cog):
             ]
         )
         title = itemname + " (" + json["name"] + ")"
-        description = "品質: " + "{:.0%}".format(float(json["quality"]))
+        description = "品質: " + "{:.0%}\n".format(float(json["quality"]))
         details = [
             "{:<20}".format("等級 10:"),
             "{:<20}".format("Masterforged(匠改):"),
