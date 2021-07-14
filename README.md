@@ -74,13 +74,16 @@ Channel list update every 10 second
 
 Unlist this channel from auto-scan list
 
-![](https://i.imgur.com/lUY11hV.jpg)
+Now, you can post a screenshot on the channel that you made the bot subscribe to
+![](https://i.imgur.com/lp6i33x.jpg)
 
-This will return a [Ornabot](https://orna.guide/gameplay?show=18) %assess string
+This will return the embed message just like [Ornabot](https://orna.guide/gameplay?show=18) do
 
-You need [Ornabot](https://orna.guide/gameplay?show=18) in the server and paste it manually
+If anything goes wrong, the bot will return a [Ornabot](https://orna.guide/gameplay?show=18) %assess string, let you fix the string and post it again
 
-![](https://i.imgur.com/PvvtdB4.jpg)
+\*\* To make %assess command work, You need [Ornabot](https://orna.guide/gameplay?show=18) in the server
+
+![](https://i.imgur.com/P8z5NxG.jpg)
 
 # TC orna bot
 
@@ -155,10 +158,13 @@ https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permiss
 
 將此頻道從機器人自動偵測圖片的頻道列表中移除
 
-![](https://i.imgur.com/lUY11hV.jpg)
+現在，你可以將遊戲中的物品截圖上傳到你剛剛讓機器人訂閱的頻道
+![](https://i.imgur.com/lp6i33x.jpg)
 
-機器人若辨識成功，會回傳 [Ornabot](https://orna.guide/gameplay?show=18) 的查詢字串
-將本字串手動複製貼上
-[Ornabot](https://orna.guide/gameplay?show=18) 必須要在同個伺服器內才能正常運作
+機器人將會回傳跟 [Ornabot](https://orna.guide/gameplay?show=18) 一樣的訊息
 
-![](https://i.imgur.com/PvvtdB4.jpg)
+若數值無法成功辨識，機器人會回傳 [Ornabot](https://orna.guide/gameplay?show=18) 的 %assess 指令字串，自行訂正後再將字串貼回頻道
+
+\*\* 要讓 %assess 指令生效，[Ornabot](https://orna.guide/gameplay?show=18) 必須要在同個伺服器內才能正常運作
+
+![](https://i.imgur.com/P8z5NxG.jpg)
