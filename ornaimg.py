@@ -2,6 +2,8 @@
 import os
 import time
 import re
+import requests
+from collections import OrderedDict
 
 import discord
 from discord.ext import commands, tasks
@@ -156,9 +158,10 @@ class Ornaimg(commands.Cog):
             return
         for embed in ctx.embeds:
             match = re.match(r"Quality: (\d+)%", embed.description)
-            quality = int(match.group(1))
-            if 195 <= quality <= 200:
-                await ctx.add_reaction("🥳")
+            if match:
+                quality = int(match.group(1))
+                if 195 <= quality <= 200:
+                    await ctx.add_reaction("🥳")
 
     async def img_process(self, ctx):
         if not await self.is_subscribe(ctx):
@@ -213,9 +216,22 @@ class Ornaimg(commands.Cog):
                 )
                 return
             searchstr = "%assess " + itemnamestr + levelstatstr
-            await ctx.reply(searchstr)
             if translated_strs["hasadornment"]:
-                await ctx.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再貼上")
+                await ctx.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
+                await ctx.reply(searchstr)
+                return
+            stats = await self.use_api(
+                itemnamestr, levelstatstr, translated_strs["levelstr"]
+            )
+            if stats:
+                print(stats)
+                embed = await self.json_to_embed(
+                    stats, translated_strs["untrans_itemnamestr"]
+                )
+                await ctx.reply(embed=embed)
+            else:
+                await ctx.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
+                await ctx.channel.send(searchstr)
 
     async def img_text_detection_with_url(self, url):
         image = vision.Image()
@@ -334,6 +350,81 @@ class Ornaimg(commands.Cog):
         for pair in correctionlist:
             itemstring = itemstring.replace(pair[0], pair[1])
         return itemstring
+
+    async def use_api(self, itemnamestr, statstr, levelstr):
+        url = "https://orna.guide/api/v1/assess"
+        data = {"name": itemnamestr}
+        data["level"] = int(re.search(r"\((\d+)\)", levelstr).group(1))
+        statslist = OrderedDict(
+            [
+                ("HP", "hp"),
+                ("Mana", "mana"),
+                ("Att", "attack"),
+                ("Mag", "magic"),
+                ("Def", "defense"),
+                ("Res", "resistance"),
+                ("Dex", "dexterity"),
+                ("Ward", "ward"),
+                ("Crit", "crit"),
+            ]
+        )
+        regexstr = r" *[:：] *(\d+)"
+        for key, value in statslist.items():
+            number = re.search(key + regexstr, statstr)
+            if number:
+                data[value] = int(number.group(1))
+        print("POSTdata: ", data)
+        r = requests.post(url, json=data)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            print(r)
+            return None
+
+    async def json_to_embed(self, json, itemname):
+        statsname = OrderedDict(
+            [
+                ("hp", "血量"),
+                ("mana", "魔力"),
+                ("attack", "物攻"),
+                ("magic", "魔攻"),
+                ("defense", "物防"),
+                ("resistance", "魔防"),
+                ("dexterity", "敏捷"),
+                ("ward", "護盾"),
+                ("crit", "暴擊"),
+            ]
+        )
+        title = itemname + " (" + json["name"] + ")"
+        description = "品質: " + "{:.0%}".format(float(json["quality"]))
+        details = [
+            "{:<20}".format("等級 10:"),
+            "{:<20}".format("Masterforged(匠改):"),
+            "{:<20}".format("Demonforged(魔改):"),
+            "{:<20}".format("Godforged(神賜):"),
+        ]
+        for key, value in statsname.items():
+            if key in json["stats"]:
+                for i in range(len(details)):
+                    details[i] += " {}:{:>4}".format(
+                        value, json["stats"][key]["values"][i + 9]
+                    )
+        details = "\n".join(details)
+        description += "```" + details + "```"
+        quality = float(json["quality"]) * 100
+        if quality < 100:
+            color = 0xCC9700
+        elif quality == 100:
+            color = 0x7F7F7F
+        elif 110 <= quality <= 119:
+            color = 0x00CC00
+        elif 120 <= quality <= 130:
+            color = 0x00EEEE
+        elif 140 <= quality <= 170:
+            color = 0xDD00EE
+        elif 170 <= quality <= 200:
+            color = 0xEE0000
+        return discord.Embed(title=title, description=description, color=color)
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
