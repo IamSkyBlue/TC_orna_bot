@@ -167,6 +167,7 @@ class Ornaimg(commands.Cog):
         if not await self.is_subscribe(msg):
             return
         for att in msg.attachments:
+            await msg.channel.trigger_typing()
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
                 return
