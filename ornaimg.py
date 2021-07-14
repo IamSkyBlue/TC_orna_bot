@@ -369,7 +369,7 @@ class Ornaimg(commands.Cog):
                 ("Crit", "crit"),
             ]
         )
-        regexstr = r" *[:：] *(\d+)"
+        regexstr = r" *[:：] *(-?\d+)"
         for key, value in statslist.items():
             number = re.search(key + regexstr, statstr)
             if number:
