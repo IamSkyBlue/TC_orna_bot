@@ -376,10 +376,9 @@ class Ornaimg(commands.Cog):
                 data[value] = int(number.group(1))
         print("POSTdata: ", data)
         r = requests.post(url, json=data)
-        if r.status_code == 200:
+        if r.status_code == 200 and r.json()["quality"] != "0":
             return r.json()
         else:
-            print(r)
             return None
 
     async def json_to_embed(self, json, itemname):
