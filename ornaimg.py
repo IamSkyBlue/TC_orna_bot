@@ -138,7 +138,7 @@ class Ornaimg(commands.Cog):
                 await ctx.send("已移除本頻道，可使用~subscribe再次訂閱")
                 return
 
-    async def is_subscribe(self, ctx) -> bool:
+    async def is_subscribe(self, msg) -> bool:
         if time.time() - self.updatetime > 10:
             self.imgporcesschannellist = imgporcesschannels.get_all_values(
                 returnas="matrix",
@@ -149,24 +149,24 @@ class Ornaimg(commands.Cog):
             self.updatetime = time.time()
         issubscribe = False
         for pair in self.imgporcesschannellist:
-            if pair[0] == str(ctx.guild.id) and pair[1] == str(ctx.channel.id):
+            if pair[0] == str(msg.guild.id) and pair[1] == str(msg.channel.id):
                 issubscribe = True
         return issubscribe
 
-    async def ornate_emoji(self, ctx):
-        if not await self.is_subscribe(ctx):
+    async def ornate_emoji(self, msg):
+        if not await self.is_subscribe(msg):
             return
-        for embed in ctx.embeds:
+        for embed in msg.embeds:
             match = re.match(r"Quality: (\d+)%", embed.description)
             if match:
                 quality = int(match.group(1))
                 if 195 <= quality <= 200:
-                    await ctx.add_reaction("🥳")
+                    await msg.add_reaction("🥳")
 
-    async def img_process(self, ctx):
-        if not await self.is_subscribe(ctx):
+    async def img_process(self, msg):
+        if not await self.is_subscribe(msg):
             return
-        for att in ctx.attachments:
+        for att in msg.attachments:
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
                 return
@@ -175,7 +175,7 @@ class Ornaimg(commands.Cog):
                 file = await att.read()
                 textlist = await self.img_text_detection_with_file(file)
             if not textlist:
-                await ctx.reply("無法辨識圖片中的文字")
+                await msg.reply("無法辨識圖片中的文字")
                 return
             translated_strs = await self.img_find_strings(textlist, False)
             print("translated_strs: ", translated_strs)
@@ -184,10 +184,10 @@ class Ornaimg(commands.Cog):
             if translated_strs["untrans_itemnamestr"] == "":
                 # if first try and second try all failed at this point
                 # this mean the img is not game screenshot
-                await ctx.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
+                await msg.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
                 return
             if translated_strs["israndom"]:
-                await ctx.reply("ornabot無法辨識隨機產生的物品")
+                await msg.reply("ornabot無法辨識隨機產生的物品")
                 return
             if not translated_strs["istranslated"]:
                 # the itemname need translation only if it is chinese
@@ -204,21 +204,21 @@ class Ornaimg(commands.Cog):
                 # if img_text_translate return an empty string
                 # this mean the name of the item can not be found in the ornaTCDB
                 if translated_strs["istranslated"]:
-                    await ctx.reply("英文物品名稱: " + translated_strs["untrans_itemnamestr"])
-                    await ctx.channel.send("本機器人非設計給原本就是英文名稱的物品，請將介面語言切換成英文直接使用ornabot")
+                    await msg.reply("英文物品名稱: " + translated_strs["untrans_itemnamestr"])
+                    await msg.channel.send("本機器人非設計給原本就是英文名稱的物品，請將介面語言切換成英文直接使用ornabot")
                 else:
-                    await ctx.reply(
+                    await msg.reply(
                         "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
                     )
-                    await ctx.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
-                await ctx.channel.send(
+                    await msg.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
+                await msg.channel.send(
                     "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
                 )
                 return
             searchstr = "%assess " + itemnamestr + levelstatstr
             if translated_strs["hasadornment"]:
-                await ctx.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
-                await ctx.reply(searchstr)
+                await msg.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
+                await msg.reply(searchstr)
                 return
             stats = await self.use_api(
                 itemnamestr, levelstatstr, translated_strs["levelstr"]
@@ -228,10 +228,10 @@ class Ornaimg(commands.Cog):
                 embed = await self.json_to_embed(
                     stats, translated_strs["untrans_itemnamestr"]
                 )
-                await ctx.reply(embed=embed)
+                await msg.reply(embed=embed)
             else:
-                await ctx.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
-                await ctx.channel.send(searchstr)
+                await msg.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
+                await msg.channel.send(searchstr)
 
     async def img_text_detection_with_url(self, url):
         image = vision.Image()
@@ -427,11 +427,11 @@ class Ornaimg(commands.Cog):
         return discord.Embed(title=title, description=description, color=color)
 
     @commands.Cog.listener()
-    async def on_message(self, ctx):
-        if ctx.attachments and not ctx.author.bot:
-            await self.img_process(ctx)
-        elif ctx.embeds:
-            await self.ornate_emoji(ctx)
+    async def on_message(self, msg):
+        if msg.attachments and not msg.author.bot:
+            await self.img_process(msg)
+        elif msg.embeds:
+            await self.ornate_emoji(msg)
 
 
 def setup(bot):
