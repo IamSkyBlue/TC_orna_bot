@@ -2,13 +2,13 @@
 
 [中文版](#tc-orna-bot-1)
 
-A traditional chinese discord bot for A traditional chinese discord bot for [Orna：GPS RPG](https://playorna.com/)
+A traditional chinese discord bot for [Orna：GPS RPG](https://playorna.com/)
 
 ## Features
 
 -   show collaborative google sheet content
 -   translate words between Chinese and English
--   auto-scan chinese equipments screenshot and return [Ornabot](https://orna.guide/gameplay?show=18) %assess string
+-   auto-scan chinese equipments screenshot and return assessment
 -   other useful commands
 
 ## Invite link
@@ -16,11 +16,13 @@ A traditional chinese discord bot for A traditional chinese discord bot for [Orn
 https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permissions=2048&scope=bot
 
 This bot only need Send Messages permission to work
+
 Read permission will be required if that channel has restricted read permissions
 
 ## Usage
 
 Only list important functions
+
 For more usage please check help command
 
 ### Search command
@@ -54,7 +56,9 @@ Show google sheet url
 ```
 
 translate string between Chinese and English
+
 String can be Chinese or English
+
 Doesn't support fuzzy search, string need to match DB exactly
 
 ![](https://i.imgur.com/pQ5ySLp.jpg)
@@ -66,6 +70,7 @@ Doesn't support fuzzy search, string need to match DB exactly
 ```
 
 Add this channel to the image auto-scan list
+
 Channel list update every 10 second
 
 ```
@@ -101,11 +106,13 @@ If anything goes wrong, the bot will return a [Ornabot](https://orna.guide/gamep
 https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permissions=2048&scope=bot
 
 本機器人只需要"傳送訊息"的權限
+
 但在有設定讀取權限的頻道中，需要額外設定讀取訊息的權限才能正常運作
 
 ## 使用方法
 
 只列出主要指令
+
 其他指令請見機器人的 help 指令
 
 ### 搜尋指令
@@ -139,6 +146,7 @@ https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permiss
 ```
 
 雙向翻譯中文/英文的詞彙
+
 不支援模糊搜尋，必須與遊戲內的字一模一樣才能搜尋的到
 
 ![](https://i.imgur.com/pQ5ySLp.jpg)
@@ -150,6 +158,7 @@ https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permiss
 ```
 
 將此頻道增加到機器人自動偵測圖片的頻道列表中
+
 頻道列表每 10 秒更新一次
 
 ```
@@ -159,12 +168,13 @@ https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permiss
 將此頻道從機器人自動偵測圖片的頻道列表中移除
 
 現在，你可以將遊戲中的物品截圖上傳到你剛剛讓機器人訂閱的頻道
+
 ![](https://i.imgur.com/lp6i33x.jpg)
 
 機器人將會回傳跟 [Ornabot](https://orna.guide/gameplay?show=18) 一樣的訊息
 
 若數值無法成功辨識，機器人會回傳 [Ornabot](https://orna.guide/gameplay?show=18) 的 %assess 指令字串，自行訂正後再將字串貼回頻道
 
-\*\* 要讓 %assess 指令生效，[Ornabot](https://orna.guide/gameplay?show=18) 必須要在同個伺服器內才能正常運作
+要讓 %assess 指令生效，[Ornabot](https://orna.guide/gameplay?show=18) 必須要在同個伺服器內才能正常運作
 
 ![](https://i.imgur.com/P8z5NxG.jpg)
