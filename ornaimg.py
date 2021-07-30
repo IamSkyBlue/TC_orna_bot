@@ -157,9 +157,9 @@ class Ornaimg(commands.Cog):
         if not await self.is_subscribe(msg):
             return
         for embed in msg.embeds:
-            match = re.match(r"Quality: (\d+)%", embed.description)
+            match = re.match(r"(Quality|品質): (\d+)%", embed.description)
             if match:
-                quality = int(match.group(1))
+                quality = int(match.group(2))
                 if 195 <= quality <= 200:
                     await msg.add_reaction("🥳")
 
