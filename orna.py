@@ -103,8 +103,8 @@ class Orna(commands.Cog):
         ]
         if not matchTitleRow:
             updatetime = TCDBmainwks.cell("A1").value
-            await ctx.send("資料庫中無符合資料，請注意是否有錯字，也可能是本資料庫未更新最新字串")
-            await ctx.send("本資料庫最後更新時間為: " + updatetime)
+            await ctx.send("資料庫中無符合資料，本資料庫最後更新時間為: " + updatetime)
+            await ctx.send("可至Rplus製作的網站查詢 <https://rplus.github.io/orna-lookup/>")
             return
 
         message = TCDBmainwks.cell(
