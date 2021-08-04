@@ -47,6 +47,8 @@ MATCH_WORD_TC = (
     "-幸運加成",
     "+跟隨者行動",
     "-跟隨者行動",
+    "+魔力節能",
+    "-魔力節能",
 )
 MATCH_WORD_EN = (
     "HP:",
@@ -58,6 +60,8 @@ MATCH_WORD_EN = (
     "Mag:",
     "Res:",
     "Crit:",
+    "",
+    "",
     "",
     "",
     "",
@@ -224,7 +228,9 @@ class Ornaimg(commands.Cog):
             stats = await self.use_api(
                 itemnamestr, levelstatstr, translated_strs["levelstr"]
             )
-            if stats:
+            if stats == "404":
+                await msg.reply("無法找到相符物品，可能是orna guide尚未新增此物品之數據，請改天再試試")
+            elif stats:
                 print(stats)
                 embed = await self.json_to_embed(
                     stats, translated_strs["untrans_itemnamestr"]
@@ -378,6 +384,8 @@ class Ornaimg(commands.Cog):
         r = requests.post(url, json=data)
         if r.status_code == 200 and r.json()["quality"] != "0":
             return r.json()
+        elif r.status_code == 404:
+            return "404"
         else:
             return None
 
