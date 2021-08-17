@@ -196,10 +196,10 @@ class Ornaimg(commands.Cog):
                 return
             if not translated_strs["istranslated"]:
                 # the itemname need translation only if it is chinese
-                itemnamestr = await self.translate_correction(
+                correct_untrans_itemnamestr = await self.translate_correction(
                     translated_strs["untrans_itemnamestr"]
                 )
-                itemnamestr = await self.img_text_translate(itemnamestr)
+                itemnamestr = await self.img_text_translate(correct_untrans_itemnamestr)
             else:
                 itemnamestr = ""
             levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
@@ -232,9 +232,7 @@ class Ornaimg(commands.Cog):
                 await msg.reply("無法找到相符物品，可能是orna guide尚未新增此物品之數據，請改天再試試")
             elif stats:
                 print(stats)
-                embed = await self.json_to_embed(
-                    stats, translated_strs["untrans_itemnamestr"]
-                )
+                embed = await self.json_to_embed(stats, correct_untrans_itemnamestr)
                 await msg.reply(embed=embed)
             else:
                 await msg.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
