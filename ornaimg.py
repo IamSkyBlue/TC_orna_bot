@@ -21,6 +21,7 @@ OrnaTCDB = gc.open("OrnaTCDB")
 TCDBmainwks = OrnaTCDB[0]
 imgporcesschannels = OrnaTCDB[1]
 correctionsheet = OrnaTCDB[2]
+specialitemsheet = OrnaTCDB[3]
 
 visionclient = vision.ImageAnnotatorClient()
 
@@ -221,6 +222,10 @@ class Ornaimg(commands.Cog):
                 )
                 return
             searchstr = "%assess " + itemnamestr + levelstatstr
+            if await self.is_special_item(correct_untrans_itemnamestr):
+                await msg.channel.send("偵測到有重複名稱的裝備，請查閱Orna Tawian中文機器人頻道釘選，以校正字串")
+                await msg.reply(searchstr)
+                return
             if translated_strs["hasadornment"]:
                 await msg.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
                 await msg.reply(searchstr)
@@ -355,6 +360,20 @@ class Ornaimg(commands.Cog):
         for pair in correctionlist:
             itemstring = itemstring.replace(pair[0], pair[1])
         return itemstring
+
+    async def is_special_item(self, correct_untrans_itemnamestr):
+        specialitemlist = specialitemsheet.get_all_values(
+            returnas="matrix",
+            majdim="ROWS",
+            include_tailing_empty=False,
+            include_tailing_empty_rows=False,
+        )[1::]
+        print(specialitemlist)
+        for itemnamerow in specialitemlist:
+            for itemname in itemnamerow:
+                if itemname in correct_untrans_itemnamestr:
+                    return True
+        return False
 
     async def use_api(self, itemnamestr, statstr, levelstr):
         url = "https://orna.guide/api/v1/assess"
