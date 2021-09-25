@@ -175,14 +175,14 @@ class Ornaimg(commands.Cog):
             await msg.channel.trigger_typing()
             attname = att.content_type.split("/")[1]
             if attname not in IMAGE_TYPE:
-                return
+                continue
             textlist = await self.img_text_detection_with_url(att.url)
             if not textlist:  # sometims google can't access the url
                 file = await att.read()
                 textlist = await self.img_text_detection_with_file(file)
             if not textlist:
                 await msg.reply("無法辨識圖片中的文字")
-                return
+                continue
             translated_strs = await self.img_find_strings(textlist, False)
             print("translated_strs: ", translated_strs)
             if translated_strs["untrans_itemnamestr"] == "":
@@ -191,10 +191,10 @@ class Ornaimg(commands.Cog):
                 # if first try and second try all failed at this point
                 # this mean the img is not game screenshot
                 await msg.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
-                return
+                continue
             if translated_strs["israndom"]:
                 await msg.reply("ornabot無法辨識隨機產生的物品")
-                return
+                continue
             if not translated_strs["istranslated"]:
                 # the itemname need translation only if it is chinese
                 correct_untrans_itemnamestr = await self.translate_correction(
@@ -220,16 +220,16 @@ class Ornaimg(commands.Cog):
                 await msg.channel.send(
                     "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
                 )
-                return
+                continue
             searchstr = "%assess " + itemnamestr + levelstatstr
             if await self.is_special_item(correct_untrans_itemnamestr):
                 await msg.channel.send("偵測到有重複名稱的裝備，請查閱Orna Tawian中文機器人頻道釘選，以校正字串")
                 await msg.reply(searchstr)
-                return
+                continue
             if translated_strs["hasadornment"]:
                 await msg.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
                 await msg.reply(searchstr)
-                return
+                continue
             stats = await self.use_api(
                 itemnamestr, levelstatstr, translated_strs["levelstr"]
             )
