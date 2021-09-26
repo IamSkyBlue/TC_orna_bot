@@ -36,8 +36,7 @@ MATCH_WORD_TC = (
     "魔攻:",
     "魔防:",
     "暴擊:",
-    "+視線範圍",
-    "-視線範圍",
+    "視線範圍",
     "+經驗加成",
     "-經驗加成",
     "+金幣加成",
@@ -46,10 +45,11 @@ MATCH_WORD_TC = (
     "-歐幣加成",
     "+幸運加成",
     "-幸運加成",
-    "+跟隨者行動",
-    "-跟隨者行動",
+    "跟隨者行動",
     "+魔力節能",
     "-魔力節能",
+    "異常狀態防護",
+    "跟隨者素質",
 )
 MATCH_WORD_EN = (
     "HP:",
@@ -287,13 +287,13 @@ class Ornaimg(commands.Cog):
                     while (
                         untrans_itemnamestr[0].isascii()
                         or len(untrans_itemnamestr) < 2
-                        or untrans_itemnamestr.startswith(("中", "回"))
+                        or untrans_itemnamestr.startswith(("中", "回", "•"))
                     ):
                         if (
                             len(untrans_itemnamestr) > 10
                             and untrans_itemnamestr.isascii()
                             and not untrans_itemnamestr.startswith(
-                                ("OO", "oo", "00", "*", "o0", "O0", "0")
+                                ("OO", "oo", "00", "*", "o0", "O0", "0", "•")
                             )
                         ):
                             # the item name is already english
@@ -368,7 +368,6 @@ class Ornaimg(commands.Cog):
             include_tailing_empty=False,
             include_tailing_empty_rows=False,
         )[1::]
-        print(specialitemlist)
         for itemnamerow in specialitemlist:
             for itemname in itemnamerow:
                 if itemname in correct_untrans_itemnamestr:
