@@ -168,80 +168,82 @@ class Ornaimg(commands.Cog):
                 if 195 <= quality <= 200:
                     await msg.add_reaction("🥳")
 
-    async def img_process(self, msg):
+    async def msg_process(self, msg):
         if not await self.is_subscribe(msg):
             return
         for att in msg.attachments:
             await msg.channel.trigger_typing()
             attname = att.content_type.split("/")[1]
-            if attname not in IMAGE_TYPE:
-                continue
-            textlist = await self.img_text_detection_with_url(att.url)
-            if not textlist:  # sometims google can't access the url
-                file = await att.read()
-                textlist = await self.img_text_detection_with_file(file)
-            if not textlist:
-                await msg.reply("無法辨識圖片中的文字")
-                continue
-            translated_strs = await self.img_find_strings(textlist, False)
-            print("translated_strs: ", translated_strs)
-            if translated_strs["untrans_itemnamestr"] == "":
-                translated_strs = await self.img_find_strings(textlist, True)
-            if translated_strs["untrans_itemnamestr"] == "":
-                # if first try and second try all failed at this point
-                # this mean the img is not game screenshot
-                await msg.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
-                continue
-            if translated_strs["israndom"]:
-                await msg.reply("ornabot無法辨識隨機產生的物品")
-                continue
-            if not translated_strs["istranslated"]:
-                # the itemname need translation only if it is chinese
-                correct_untrans_itemnamestr = await self.translate_correction(
-                    translated_strs["untrans_itemnamestr"]
-                )
-                itemnamestr = await self.img_text_translate(correct_untrans_itemnamestr)
-            else:
-                itemnamestr = ""
-            levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
-            levelstatstr = levelstatstr.replace("\n", " ")
-            levelstatstr = levelstatstr.replace("  ", " ")
-            if not itemnamestr:
-                # if img_text_translate return an empty string
-                # this mean the name of the item can not be found in the ornaTCDB
-                if translated_strs["istranslated"]:
-                    await msg.reply("英文物品名稱: " + translated_strs["untrans_itemnamestr"])
-                    await msg.channel.send("本機器人非設計給原本就是英文名稱的物品，請將介面語言切換成英文直接使用ornabot")
-                else:
-                    await msg.reply(
-                        "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
-                    )
-                    await msg.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
-                await msg.channel.send(
-                    "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
-                )
-                continue
-            searchstr = "%assess " + itemnamestr + levelstatstr
-            if await self.is_special_item(correct_untrans_itemnamestr):
-                await msg.channel.send("偵測到有重複名稱的裝備，請查閱Orna Tawian中文機器人頻道釘選，以校正字串")
-                await msg.reply(searchstr)
-                continue
-            if translated_strs["hasadornment"]:
-                await msg.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
-                await msg.reply(searchstr)
-                continue
-            stats = await self.use_api(
-                itemnamestr, levelstatstr, translated_strs["levelstr"]
+            if attname in IMAGE_TYPE:
+                await self.img_process(att, msg)
+
+    async def img_process(self, att, msg):
+        textlist = await self.img_text_detection_with_url(att.url)
+        if not textlist:  # sometims google can't access the url
+            file = await att.read()
+            textlist = await self.img_text_detection_with_file(file)
+        if not textlist:
+            await msg.reply("無法辨識圖片中的文字")
+            return
+        translated_strs = await self.img_find_strings(textlist, False)
+        print("translated_strs: ", translated_strs)
+        if translated_strs["untrans_itemnamestr"] == "":
+            translated_strs = await self.img_find_strings(textlist, True)
+        if translated_strs["untrans_itemnamestr"] == "":
+            # if first try and second try all failed at this point
+            # this mean the img is not game screenshot
+            await msg.reply('無法辨識圖片中的物品名稱，截圖請勿擋住左上角的"儲藏室"')
+            return
+        if translated_strs["israndom"]:
+            await msg.reply("ornabot無法辨識隨機產生的物品")
+            return
+        if not translated_strs["istranslated"]:
+            # the itemname need translation only if it is chinese
+            correct_untrans_itemnamestr = await self.translate_correction(
+                translated_strs["untrans_itemnamestr"]
             )
-            if stats == "404":
-                await msg.reply("無法找到相符物品，可能是orna guide尚未新增此物品之數據，請改天再試試")
-            elif stats:
-                print(stats)
-                embed = await self.json_to_embed(stats, correct_untrans_itemnamestr)
-                await msg.reply(embed=embed)
+            itemnamestr = await self.img_text_translate(correct_untrans_itemnamestr)
+        else:
+            itemnamestr = ""
+        levelstatstr = translated_strs["levelstr"] + translated_strs["statstr"]
+        levelstatstr = levelstatstr.replace("\n", " ")
+        levelstatstr = levelstatstr.replace("  ", " ")
+        if not itemnamestr:
+            # if img_text_translate return an empty string
+            # this mean the name of the item can not be found in the ornaTCDB
+            if translated_strs["istranslated"]:
+                await msg.reply("英文物品名稱: " + translated_strs["untrans_itemnamestr"])
+                await msg.channel.send("本機器人非設計給原本就是英文名稱的物品，請將介面語言切換成英文直接使用ornabot")
             else:
-                await msg.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
-                await msg.channel.send(searchstr)
+                await msg.reply(
+                    "無法在資料庫中找到相符物品: " + translated_strs["untrans_itemnamestr"]
+                )
+                await msg.channel.send("可能是隨機產生的物品或是辨識錯字，若是錯字請聯繫 @SkyBlue#1688")
+            await msg.channel.send(
+                "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
+            )
+            return
+        searchstr = "%assess " + itemnamestr + levelstatstr
+        if await self.is_special_item(correct_untrans_itemnamestr):
+            await msg.channel.send("偵測到有重複名稱的裝備，請查閱Orna Tawian中文機器人頻道釘選，以校正字串")
+            await msg.reply(searchstr)
+            return
+        if translated_strs["hasadornment"]:
+            await msg.channel.send("偵測到有寶石鑲嵌，請自行扣除寶石所增加的數值後再將字串貼上")
+            await msg.reply(searchstr)
+            return
+        stats = await self.use_api(
+            itemnamestr, levelstatstr, translated_strs["levelstr"]
+        )
+        if stats == "404":
+            await msg.reply("無法找到相符物品，可能是orna guide尚未新增此物品之數據，請改天再試試")
+        elif stats:
+            print(stats)
+            embed = await self.json_to_embed(stats, correct_untrans_itemnamestr)
+            await msg.reply(embed=embed)
+        else:
+            await msg.reply("無法檢測到相符的數據，可能是辨識錯字或是有寶石鑲嵌，請訂正下列訊息後再貼上")
+            await msg.channel.send(searchstr)
 
     async def img_text_detection_with_url(self, url):
         image = vision.Image()
@@ -453,7 +455,7 @@ class Ornaimg(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.attachments and not msg.author.bot:
-            await self.img_process(msg)
+            await self.msg_process(msg)
         elif msg.embeds:
             await self.ornate_emoji(msg)
 
