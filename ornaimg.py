@@ -289,7 +289,7 @@ class Ornaimg(commands.Cog):
                     while (
                         untrans_itemnamestr[0].isascii()
                         or len(untrans_itemnamestr) < 2
-                        or untrans_itemnamestr.startswith(("中", "回", "•"))
+                        or untrans_itemnamestr.startswith(("申", "中", "回", "•"))
                     ):
                         if (
                             len(untrans_itemnamestr) > 10
