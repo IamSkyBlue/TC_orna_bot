@@ -223,7 +223,7 @@ class Ornaimg(commands.Cog):
                 "數值字串: " + translated_strs["levelstr"] + translated_strs["statstr"]
             )
             return
-        searchstr = "%assess " + itemnamestr + levelstatstr
+        searchstr = "!assess " + itemnamestr + levelstatstr
         if await self.is_special_item(correct_untrans_itemnamestr):
             await msg.channel.send("偵測到有重複名稱的裝備，請查閱Orna Tawian中文機器人頻道釘選，以校正字串")
             await msg.reply(searchstr)
