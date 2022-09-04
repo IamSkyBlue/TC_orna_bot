@@ -26,10 +26,6 @@ bot.load_extension("poll")
 bot.load_extension("memes")
 bot.load_extension("admin")
 
-bot.load_extension(
-    "mcserver"
-)  # this cog is for private use! If you fork from this repo, you can delete this line
-
 
 @bot.event
 async def on_ready():
