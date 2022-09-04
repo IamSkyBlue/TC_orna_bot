@@ -15,6 +15,14 @@ A traditional chinese discord bot for [Orna：GPS RPG](https://playorna.com/)
 
 https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permissions=2048&scope=bot
 
+## Privacy Policy of the pre-setup bot
+
+Information Collection and Use:
+PERSONAL DATA
+we do not collect personal data, like user name, user id.
+USAGE DATA
+we only collect the post image or text in the subscribe only, and use those info to provide our service.
+
 This bot only need Send Messages permission to work
 
 Read permission will be required if that channel has restricted read permissions
