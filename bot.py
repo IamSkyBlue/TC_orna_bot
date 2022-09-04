@@ -7,7 +7,6 @@ from discord.ext import commands, tasks
 
 from orna import Orna
 from poll import Poll
-from mcserver import MCserver
 from memes import Memes
 from help import TCHelp
 
