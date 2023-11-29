@@ -295,7 +295,7 @@ class Ornaimg(commands.Cog):
                             len(untrans_itemnamestr) > 10
                             and untrans_itemnamestr.isascii()
                             and not untrans_itemnamestr.startswith(
-                                ("OO", "oo", "00", "*", "o0", "O0", "0", "•")
+                                ("〇〇","OO", "oo", "00", "*", "o0", "O0", "0", "•")
                             )
                         ):
                             # the item name is already english
