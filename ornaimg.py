@@ -172,7 +172,7 @@ class Ornaimg(commands.Cog):
         if not await self.is_subscribe(msg):
             return
         for att in msg.attachments:
-            await msg.channel.trigger_typing()
+            await msg.channel.typing()
             attname = att.content_type.split("/")[1]
             if attname in IMAGE_TYPE:
                 await self.img_process(att, msg)
@@ -460,5 +460,5 @@ class Ornaimg(commands.Cog):
             await self.ornate_emoji(msg)
 
 
-def setup(bot):
-    bot.add_cog(Ornaimg(bot))
+async def setup(bot):
+    await bot.add_cog(Ornaimg(bot))

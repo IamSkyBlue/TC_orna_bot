@@ -117,5 +117,5 @@ class Orna(commands.Cog):
             await ctx.send(guideurl)
 
 
-def setup(bot):
-    bot.add_cog(Orna(bot))
+async def setup(bot):
+    await bot.add_cog(Orna(bot))

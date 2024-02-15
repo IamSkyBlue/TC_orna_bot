@@ -25,7 +25,7 @@ class Memes(commands.Cog):
         draw = ImageDraw.Draw(img)
         imgwidth = img.size[0]
         for text in textlist:
-            width = draw.textsize(text, font=font)[0]
+            width = draw.textlength(text, font=font)
             draw.text(
                 ((imgwidth - width) / 2, textheight),
                 text,
@@ -38,5 +38,5 @@ class Memes(commands.Cog):
         await ctx.send(file=discord.File(newimgname))
 
 
-def setup(bot):
-    bot.add_cog(Memes(bot))
+async def setup(bot):
+    await bot.add_cog(Memes(bot))

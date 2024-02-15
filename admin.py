@@ -62,5 +62,5 @@ class Admin(commands.Cog):
             await ctx.send("\N{OK HAND SIGN}")
 
 
-def setup(bot):
-    bot.add_cog(Admin(bot))
+async def setup(bot):
+    await bot.add_cog(Admin(bot))
