@@ -17,11 +17,11 @@ https://discordapp.com/api/oauth2/authorize?client_id=674503174551502857&permiss
 
 ## Privacy Policy of the pre-setup bot
 
-Information Collection and Use:
-PERSONAL DATA
-we do not collect personal data, like user name, user id.
-USAGE DATA
-we only collect the post image or text in the subscribe only, and use those info to provide our service.
+### Information Collection and Use:
+
+-   PERSONAL DATA: we do not collect personal data, like user name, user id.
+
+-   USAGE DATA: we only collect the post image or text in the subscribe only, and use those info to provide our service.
 
 This bot only need Send Messages permission to work
 
